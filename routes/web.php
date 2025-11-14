@@ -8,11 +8,11 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminTableController;
 use App\Http\Controllers\Admin\AdminTransactionController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MidtransController;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index']);
 
 
 Route::get('/dashboard', function () {
@@ -33,3 +33,5 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::post('/midtrans/create', [MidtransController::class, 'createTransaction']);
