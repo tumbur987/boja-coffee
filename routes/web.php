@@ -8,8 +8,11 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminTableController;
 use App\Http\Controllers\Admin\AdminTransactionController;
+use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MidtransController;
+use App\Http\Controllers\OrderController;
+use App\Models\Product;
 
 
 Route::get('/', [HomeController::class, 'index']);
@@ -24,12 +27,27 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/user', [AdminUserController::class, 'index'])->name('user.index');
-    Route::get('/product', [AdminProductController::class, 'index'])->name('product.index');
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/category', [AdminCategoryController::class, 'index'])->name('category.index');
-    Route::get('/table', [AdminTableController::class, 'index'])->name('table.index');
-    Route::get('/transaction', [AdminTransactionController::class, 'index'])->name('transaction.index');
+
+    Route::resource('category', AdminCategoryController::class);
+    Route::resource('product', AdminProductController::class);
+    Route::resource('table', AdminTableController::class);
+    Route::resource('transaction', AdminTransactionController::class);
+    Route::resource('user', AdminUserController::class);
+
+    Route::get('setting', [AdminSettingController::class, 'index'])->name('setting.index');
+    Route::put('setting', [AdminSettingController::class, 'update'])->name('setting.update');
+
+    Route::get('table/{table}/qr-download', [AdminTableController::class, 'qrDownload'])->name('table.qr-download');
+    Route::get('table/{table}/qr-preview', [AdminTableController::class, 'qrPreview'])->name('table.qr-preview');
+});
+
+// Client order page (no auth)
+Route::get('/order/{code}', [OrderController::class, 'index'])->name('order.index');
+
+// API for client menu
+Route::get('/api/menu', function () {
+    return response()->json(Product::with('category')->where('stock', '>', 0)->get());
 });
 
 require __DIR__.'/auth.php';

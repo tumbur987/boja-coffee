@@ -1,30 +1,27 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
+    <h2>Verifikasi Email</h2>
+    <p class="subtitle">Terima kasih telah mendaftar! Silakan verifikasi email Anda dengan mengklik link yang kami kirimkan.</p>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+        <div class="status-message">
+            <i class="fas fa-check-circle"></i>
+            Link verifikasi baru telah dikirim ke email Anda.
         </div>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; margin-bottom: 20px;">
+        <form method="POST" action="{{ route('verification.send') }}" style="display: inline;">
             @csrf
-
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
-            </div>
+            <button type="submit" class="btn-login" style="width: auto; padding: 14px 24px;">
+                <i class="fas fa-redo"></i>
+                Kirim Ulang
+            </button>
         </form>
 
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('logout') }}" style="display: inline;">
             @csrf
-
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
+            <button type="submit" class="forgot-link" style="background: none; border: none; cursor: pointer; font-family: inherit; font-size: inherit;">
+                Keluar
             </button>
         </form>
     </div>
