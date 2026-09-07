@@ -113,13 +113,17 @@ class MidtransController extends Controller
 
     public function paymentStatus(Request $request)
     {
+        $orderId = $request->input('order_id');
+        Log::info('payment-status dipanggil', ['order_id' => $orderId, 'ip' => $request->ip()]);
+
         $request->validate([
             'order_id' => 'required|string',
         ]);
 
-        $transaction = Transaction::where('order_id', $request->order_id)->first();
+        $transaction = Transaction::where('order_id', $orderId)->first();
 
         if (!$transaction) {
+            Log::warning('payment-status: transaksi tidak ditemukan', ['order_id' => $orderId]);
             return response()->json([
                 'success' => false,
                 'message' => 'Pesanan tidak ditemukan.',
@@ -127,12 +131,13 @@ class MidtransController extends Controller
         }
 
         if ($transaction->status === 'lunas') {
+            Log::info('payment-status: sudah lunas', ['order_id' => $orderId]);
             return response()->json(['success' => true, 'status' => 'lunas']);
         }
 
         $transaction->update(['status' => 'lunas']);
 
-        Log::info('Transaksi lunas via payment-status: ' . $transaction->order_id);
+        Log::info('payment-status: BERHASIL lunas', ['order_id' => $orderId]);
 
         return response()->json([
             'success' => true,

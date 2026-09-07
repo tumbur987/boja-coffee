@@ -404,6 +404,7 @@
         }
 
         var pendingOrderId = null;
+        var pollingTimer = null;
 
         function submitOrder() {
             var items = [];
@@ -436,25 +437,25 @@
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
+                resetBtns();
                 if (data.token && data.order_id) {
                     pendingOrderId = data.order_id;
+                    updateStatus('pending');
                     snap.pay(data.token, {
                         onSuccess: function() {
-                            verifyPayment(pendingOrderId);
+                            updateStatus('lunas');
                         },
                         onPending: function() {
-                            verifyPayment(pendingOrderId);
+                            updateStatus('pending');
                         },
                         onError: function() {
-                            resetBtns();
-                            showError('Pembayaran gagal. Silakan coba lagi.');
+                            updateStatus('error');
                         },
                         onClose: function() {
-                            verifyPayment(pendingOrderId);
+                            startPolling();
                         }
                     });
                 } else {
-                    resetBtns();
                     showError(data.message || 'Terjadi kesalahan. Silakan coba lagi.');
                 }
             })
@@ -472,58 +473,60 @@
             document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
         }
 
-        function verifyPayment(orderId, attempt) {
-            attempt = attempt || 0;
-            if (!orderId) return;
-
-            btns.forEach(function(btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memverifikasi...';
-            });
-
-            fetch('/midtrans/payment-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ order_id: orderId })
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data && data.success) {
-                    showSuccess();
-                } else if (attempt < 4) {
-                    setTimeout(function() { verifyPayment(orderId, attempt + 1); }, 2000);
-                } else {
-                    resetBtns();
-                    showPending();
-                }
-            })
-            .catch(function() {
-                if (attempt < 4) {
-                    setTimeout(function() { verifyPayment(orderId, attempt + 1); }, 2000);
-                } else {
-                    resetBtns();
-                    showPending();
-                }
-            });
+        function updateStatus(status) {
+            if (status === 'lunas') {
+                document.getElementById('successTitle').textContent = 'Pembayaran Berhasil!';
+                document.getElementById('successDesc').textContent = 'Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.';
+                document.getElementById('successIcon').innerHTML = '&#10003;';
+                document.getElementById('successOverlay').classList.add('show');
+                stopPolling();
+            } else if (status === 'pending') {
+                document.getElementById('successTitle').textContent = 'Menunggu Pembayaran';
+                document.getElementById('successDesc').textContent = 'Pesanan Anda diterima. Selesaikan pembayaran melalui metode yang Anda pilih agar pesanan diproses.';
+                document.getElementById('successIcon').innerHTML = '&#8987;';
+                document.getElementById('successOverlay').classList.add('show');
+            } else {
+                document.getElementById('successTitle').textContent = 'Pembayaran Gagal';
+                document.getElementById('successDesc').textContent = 'Terjadi kesalahan. Silakan coba pesan ulang.';
+                document.getElementById('successIcon').innerHTML = '&#10007;';
+                document.getElementById('successOverlay').classList.add('show');
+            }
         }
 
-        function showSuccess() {
-            closeDrawer();
-            document.getElementById('successTitle').textContent = 'Pembayaran Berhasil!';
-            document.getElementById('successDesc').textContent = 'Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.';
-            document.getElementById('successIcon').innerHTML = '&#10003;';
-            document.getElementById('successOverlay').classList.add('show');
+        function startPolling() {
+            if (!pendingOrderId) return;
+            var attempt = 0;
+            pollingTimer = setInterval(function() {
+                attempt++;
+                fetch('/midtrans/payment-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ order_id: pendingOrderId })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data && data.success) {
+                        updateStatus('lunas');
+                    } else if (attempt >= 10) {
+                        updateStatus('pending');
+                    }
+                })
+                .catch(function() {
+                    if (attempt >= 10) {
+                        updateStatus('pending');
+                    }
+                });
+            }, 2000);
         }
 
-        function showPending() {
-            closeDrawer();
-            document.getElementById('successTitle').textContent = 'Menunggu Pembayaran';
-            document.getElementById('successDesc').textContent = 'Pesanan Anda diterima. Selesaikan pembayaran melalui metode yang Anda pilih agar pesanan diproses.';
-            document.getElementById('successIcon').innerHTML = '&#8987;';
-            document.getElementById('successOverlay').classList.add('show');
+        function stopPolling() {
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+                pollingTimer = null;
+            }
         }
 
         function showError(message) {
@@ -531,6 +534,8 @@
         }
 
         function resetOrder() {
+            stopPolling();
+            pendingOrderId = null;
             cart = {};
             updateCart();
             document.getElementById('successOverlay').classList.remove('show');
