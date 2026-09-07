@@ -168,8 +168,8 @@
                 <button class="cart-view-btn" id="cartViewBtn" onclick="openDrawer()">
                     <i class="fas fa-shopping-bag"></i>
                 </button>
-                <button class="cart-btn" id="cartBtn" onclick="submitOrder()">
-                    Pesan
+                <button class="cart-btn" id="cartBtn" onclick="openDrawer()">
+                    <i class="fas fa-shopping-bag"></i> Keranjang
                 </button>
             </div>
         </div>
@@ -204,9 +204,9 @@
 
     <div class="success-overlay" id="successOverlay">
         <div class="success-box">
-            <div class="success-icon">&#10003;</div>
-            <h2>Pembayaran Berhasil!</h2>
-            <p>Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.</p>
+            <div class="success-icon" id="successIcon">&#10003;</div>
+            <h2 id="successTitle">Pembayaran Berhasil!</h2>
+            <p id="successDesc">Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.</p>
             <div class="table-code">Meja {{ $table->number }}</div>
             <br>
             <button class="success-btn" onclick="resetOrder()">Pesan Lagi</button>
@@ -422,7 +422,7 @@
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang';
                 });
-                document.getElementById('cartBtn').innerHTML = 'Pesan';
+                document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
 
                 if (data.token) {
                     snap.pay(data.token, {
@@ -430,14 +430,17 @@
                             showSuccess();
                         },
                         onPending: function() {
-                            showSuccess();
+                            showPending();
+                        },
+                        onError: function() {
+                            showError('Pembayaran gagal. Silakan coba lagi.');
                         },
                         onClose: function() {}
                     });
                 } else if (data.success) {
                     showSuccess();
                 } else {
-                    alert('Terjadi kesalahan. Silakan coba lagi.');
+                    showError(data.message || 'Terjadi kesalahan. Silakan coba lagi.');
                 }
             })
             .catch(function() {
@@ -445,14 +448,29 @@
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang';
                 });
-                document.getElementById('cartBtn').innerHTML = 'Pesan';
-                alert('Gagal menghubungi server. Coba lagi.');
+                document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
+                showError('Gagal menghubungi server. Coba lagi.');
             });
         }
 
         function showSuccess() {
             closeDrawer();
+            document.getElementById('successTitle').textContent = 'Pembayaran Berhasil!';
+            document.getElementById('successDesc').textContent = 'Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.';
+            document.getElementById('successIcon').innerHTML = '&#10003;';
             document.getElementById('successOverlay').classList.add('show');
+        }
+
+        function showPending() {
+            closeDrawer();
+            document.getElementById('successTitle').textContent = 'Menunggu Pembayaran';
+            document.getElementById('successDesc').textContent = 'Pesanan Anda diterima. Selesaikan pembayaran melalui metode yang Anda pilih agar pesanan diproses.';
+            document.getElementById('successIcon').innerHTML = '&#8987;';
+            document.getElementById('successOverlay').classList.add('show');
+        }
+
+        function showError(message) {
+            alert(message || 'Terjadi kesalahan. Silakan coba lagi.');
         }
 
         function resetOrder() {

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Transaction;
-use App\Models\TransactionItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Midtrans\Snap;
 
@@ -22,18 +22,22 @@ class MidtransController extends Controller
 
         $totalPrice = 0;
         $itemsData  = [];
-        $productNames = [];
+        $itemDetails = [];
 
         foreach ($request->items as $item) {
             $product = Product::findOrFail($item['product_id']);
-            $subtotal = $product->price * $item['quantity'];
-            $totalPrice += $subtotal;
+            $totalPrice += $product->price * $item['quantity'];
             $itemsData[] = [
                 'product_id' => $product->id,
                 'quantity'   => $item['quantity'],
                 'price'      => $product->price,
             ];
-            $productNames[] = $product->name;
+            $itemDetails[] = [
+                'id'       => $product->id,
+                'name'     => $product->name,
+                'price'    => $product->price,
+                'quantity' => $item['quantity'],
+            ];
         }
 
         $orderId = 'SIBOJA-' . strtoupper(Str::random(6)) . '-' . time();
@@ -54,14 +58,7 @@ class MidtransController extends Controller
                 'order_id'     => $orderId,
                 'gross_amount' => $totalPrice,
             ],
-            'item_details' => array_map(function($item) {
-                return [
-                    'id'    => $item['product_id'],
-                    'price' => $item['price'],
-                    'quantity' => $item['quantity'],
-                    'name' => Product::find($item['product_id'])->name,
-                ];
-            }, $itemsData),
+            'item_details' => $itemDetails,
             'customer_details' => [
                 'first_name' => 'Pelanggan',
                 'email'      => 'customer@siboja.com',
@@ -73,8 +70,42 @@ class MidtransController extends Controller
             $snapToken = Snap::getSnapToken($params);
             return response()->json(['token' => $snapToken]);
         } catch (\Exception $e) {
-            $transaction->update(['status' => 'paid']);
-            return response()->json(['success' => true, 'message' => 'Transaksi berhasil']);
+            Log::error('Midtrans Snap gagal: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat pembayaran. Silakan coba lagi.',
+            ], 500);
         }
+    }
+
+    public function notification(Request $request)
+    {
+        $serverKey  = config('midtrans.server_key');
+        $signature  = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+
+        if (!hash_equals($signature, (string) $request->signature_key)) {
+            return response()->json(['status' => 'invalid signature'], 403);
+        }
+
+        $transaction = Transaction::where('order_id', $request->order_id)->first();
+
+        if (!$transaction) {
+            return response()->json(['status' => 'order not found'], 404);
+        }
+
+        if ((int) $request->gross_amount !== (int) $transaction->total_price) {
+            return response()->json(['status' => 'amount mismatch'], 400);
+        }
+
+        $transactionStatus = $request->transaction_status;
+        $fraudStatus       = $request->fraud_status;
+
+        if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
+            $transaction->update(['status' => 'paid']);
+        } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
+            $transaction->update(['status' => 'cancelled']);
+        }
+
+        return response()->json(['status' => 'ok']);
     }
 }

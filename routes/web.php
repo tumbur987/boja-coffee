@@ -53,3 +53,4 @@ Route::get('/api/menu', function () {
 require __DIR__.'/auth.php';
 
 Route::post('/midtrans/create', [MidtransController::class, 'createTransaction']);
+Route::post('/midtrans/notification', [MidtransController::class, 'notification'])->name('midtrans.notification');
