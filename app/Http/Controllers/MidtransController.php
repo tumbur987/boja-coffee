@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Midtrans\Snap;
+use Midtrans\Transaction as MidtransTransaction;
 
 class MidtransController extends Controller
 {
@@ -101,11 +102,43 @@ class MidtransController extends Controller
         $fraudStatus       = $request->fraud_status;
 
         if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
-            $transaction->update(['status' => 'paid']);
+            $transaction->update(['status' => 'lunas']);
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
             $transaction->update(['status' => 'cancelled']);
         }
 
         return response()->json(['status' => 'ok']);
+    }
+
+    public function paymentStatus(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|string',
+        ]);
+
+        $transaction = Transaction::where('order_id', $request->order_id)->first();
+
+        if (!$transaction) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan.'], 404);
+        }
+
+        try {
+            $status = MidtransTransaction::status($transaction->order_id);
+            $transactionStatus = $status->transaction_status;
+            $fraudStatus       = $status->fraud_status ?? null;
+
+            if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
+                $transaction->update(['status' => 'lunas']);
+            } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
+                $transaction->update(['status' => 'cancelled']);
+            }
+
+            return response()->json([
+                'success' => $transaction->fresh()->status === 'lunas',
+                'status'  => $transaction->fresh()->status,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal memeriksa status pembayaran.'], 500);
+        }
     }
 }

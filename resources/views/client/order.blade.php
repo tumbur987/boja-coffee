@@ -221,6 +221,7 @@
         var cart = {};
         var allProducts = [];
         var activeCategory = 'all';
+        var btns = [];
         var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
 
         fetch('/api/menu')
@@ -402,7 +403,7 @@
             });
             if (items.length === 0) return;
 
-            var btns = [document.getElementById('cartBtn'), document.getElementById('drawerCheckoutBtn')];
+            btns = [document.getElementById('cartBtn'), document.getElementById('drawerCheckoutBtn')];
             btns.forEach(function(btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
@@ -426,8 +427,8 @@
 
                 if (data.token) {
                     snap.pay(data.token, {
-                        onSuccess: function() {
-                            showSuccess();
+                        onSuccess: function(result) {
+                            markPaid(result.order_id, true);
                         },
                         onPending: function() {
                             showPending();
@@ -450,6 +451,44 @@
                 });
                 document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
                 showError('Gagal menghubungi server. Coba lagi.');
+            });
+        }
+
+        function markPaid(orderId, success) {
+            btns.forEach(function(btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            });
+
+            fetch('/midtrans/payment-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ order_id: orderId })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btns.forEach(function(btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang';
+                });
+                document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
+
+                if (success || (data && data.success)) {
+                    showSuccess();
+                } else {
+                    showPending();
+                }
+            })
+            .catch(function() {
+                btns.forEach(function(btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang';
+                });
+                document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
+                showPending();
             });
         }
 
