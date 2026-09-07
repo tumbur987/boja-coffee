@@ -117,15 +117,17 @@ class MidtransController extends Controller
             'order_id' => 'required|string',
         ]);
 
-        $transaction = Transaction::where('order_id', $request->order_id)
-            ->where('status', 'pending')
-            ->first();
+        $transaction = Transaction::where('order_id', $request->order_id)->first();
 
         if (!$transaction) {
             return response()->json([
                 'success' => false,
-                'message' => 'Pesanan tidak ditemukan atau sudah diproses.',
+                'message' => 'Pesanan tidak ditemukan.',
             ], 404);
+        }
+
+        if ($transaction->status === 'lunas') {
+            return response()->json(['success' => true, 'status' => 'lunas']);
         }
 
         $transaction->update(['status' => 'lunas']);
