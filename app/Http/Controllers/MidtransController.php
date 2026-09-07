@@ -69,7 +69,7 @@ class MidtransController extends Controller
 
         try {
             $snapToken = Snap::getSnapToken($params);
-            return response()->json(['token' => $snapToken]);
+            return response()->json(['token' => $snapToken, 'order_id' => $orderId]);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap gagal: ' . $e->getMessage());
             return response()->json([
