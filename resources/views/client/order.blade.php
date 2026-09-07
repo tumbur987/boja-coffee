@@ -501,8 +501,6 @@
                 showPending();
             });
         }
-            });
-        }
 
         function showSuccess() {
             closeDrawer();
