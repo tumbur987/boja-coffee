@@ -118,6 +118,10 @@
         .drawer-checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
         .drawer-empty { text-align: center; padding: 40px 20px; color: var(--text-light); }
         .drawer-empty i { font-size: 40px; opacity: 0.2; display: block; margin-bottom: 12px; }
+        .drawer-name { margin-bottom: 12px; }
+        .drawer-name-input { width: 100%; padding: 12px 14px; border: 2px solid rgba(74,44,42,0.12); border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--dark); background: var(--cream-lighter); outline: none; transition: border-color 0.2s; }
+        .drawer-name-input:focus { border-color: var(--coffee); }
+        .drawer-name-input::placeholder { color: var(--text-light); font-weight: 400; }
 
         .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cart-btn-wrapper { position: relative; }
@@ -191,6 +195,9 @@
         <div class="drawer-footer" id="drawerFooter" style="display:none;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
                 <button class="drawer-clear-btn" onclick="clearCart()"><i class="fas fa-trash-alt"></i> Kosongkan</button>
+            </div>
+            <div class="drawer-name">
+                <input type="text" id="customerName" class="drawer-name-input" placeholder="Nama Anda" maxlength="255" required>
             </div>
             <div class="drawer-summary">
                 <span class="drawer-summary-label">Total</span>
@@ -403,6 +410,14 @@
             });
             if (items.length === 0) return;
 
+            var customerName = document.getElementById('customerName').value.trim();
+            if (!customerName) {
+                alert('Mohon isi nama Anda.');
+                openDrawer();
+                document.getElementById('customerName').focus();
+                return;
+            }
+
             btns = [document.getElementById('cartBtn'), document.getElementById('drawerCheckoutBtn')];
             btns.forEach(function(btn) {
                 btn.disabled = true;
@@ -415,7 +430,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ table_id: tableId, items: items })
+                body: JSON.stringify({ table_id: tableId, customer_name: customerName, items: items })
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {

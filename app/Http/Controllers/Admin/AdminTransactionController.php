@@ -76,9 +76,10 @@ class AdminTransactionController extends Controller
 
     public function update(Request $request, Transaction $transaction)
     {
-        $request->validate([
+$request->validate([
             'table_id'           => 'required|exists:tables,id',
-            'status'             => 'required|in:pending,paid,cancelled',
+            'customer_name'      => 'required|string|max:255',
+            'status'             => 'required|in:pending,lunas,cancelled',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
@@ -99,9 +100,10 @@ class AdminTransactionController extends Controller
         }
 
         $transaction->update([
-            'table_id'    => $request->table_id,
-            'total_price' => $totalPrice,
-            'status'      => $request->status,
+            'table_id'       => $request->table_id,
+            'customer_name'  => $request->customer_name,
+            'total_price'    => $totalPrice,
+            'status'         => $request->status,
         ]);
 
         $transaction->items()->delete();

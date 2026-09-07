@@ -77,6 +77,7 @@
                     <thead>
                         <tr>
                             <th>Meja</th>
+                            <th>Pelanggan</th>
                             <th>Total</th>
                             <th>Status</th>
                             <th>Waktu</th>
@@ -86,6 +87,7 @@
                         @forelse (\App\Models\Transaction::with('table')->latest()->take(5)->get() as $trx)
                         <tr>
                             <td><span class="badge badge-primary">Meja {{ $trx->table->number }}</span></td>
+                            <td style="font-weight: 600;">{{ $trx->customer_name ?? '-' }}</td>
                             <td style="font-weight: 700;">Rp.{{ number_format($trx->total_price, 0, ',', '.') }}</td>
                             <td>
                                 @if ($trx->status == 'paid')
@@ -100,7 +102,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" style="text-align: center; padding: 30px; color: var(--text-muted);">Belum ada transaksi</td>
+                            <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">Belum ada transaksi</td>
                         </tr>
                         @endforelse
                     </tbody>

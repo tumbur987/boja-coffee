@@ -13,6 +13,7 @@
                     <tr>
                         <th style="width:40px;">No</th>
                         <th>Meja</th>
+                        <th>Pelanggan</th>
                         <th>Item</th>
                         <th>Total</th>
                         <th>Status</th>
@@ -24,6 +25,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td><span class="badge badge-primary">Meja {{ $transaction->table->number }}</span></td>
+                        <td style="font-weight:600;">{{ $transaction->customer_name ?? '-' }}</td>
                         <td>
                             <ul class="mb-0 pl-3" style="font-size:13px;">
                                 @foreach ($transaction->items as $item)
@@ -52,7 +54,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center" style="padding:30px; color:var(--text-muted);">
+                        <td colspan="7" class="text-center" style="padding:30px; color:var(--text-muted);">
                             <i class="fas fa-inbox" style="font-size:32px; opacity:0.3; display:block; margin-bottom:8px;"></i>
                             Belum ada transaksi
                         </td>

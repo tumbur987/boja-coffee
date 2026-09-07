@@ -14,8 +14,9 @@ class MidtransController extends Controller
     public function createTransaction(Request $request)
     {
         $request->validate([
-            'table_id'     => 'required|exists:tables,id',
-            'items'        => 'required|array|min:1',
+            'table_id'        => 'required|exists:tables,id',
+            'customer_name'   => 'required|string|max:255',
+            'items'           => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
         ]);
@@ -43,10 +44,11 @@ class MidtransController extends Controller
         $orderId = 'SIBOJA-' . strtoupper(Str::random(6)) . '-' . time();
 
         $transaction = Transaction::create([
-            'table_id'    => $request->table_id,
-            'total_price' => $totalPrice,
-            'status'      => 'pending',
-            'order_id'    => $orderId,
+            'table_id'       => $request->table_id,
+            'customer_name'  => $request->customer_name,
+            'total_price'    => $totalPrice,
+            'status'         => 'pending',
+            'order_id'       => $orderId,
         ]);
 
         foreach ($itemsData as $item) {
@@ -60,7 +62,7 @@ class MidtransController extends Controller
             ],
             'item_details' => $itemDetails,
             'customer_details' => [
-                'first_name' => 'Pelanggan',
+                'first_name' => $request->customer_name,
                 'email'      => 'customer@siboja.com',
                 'phone'      => '-',
             ],

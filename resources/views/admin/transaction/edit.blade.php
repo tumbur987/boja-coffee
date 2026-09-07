@@ -28,6 +28,10 @@
                 </select>
             </div>
             <div class="form-group">
+                <label for="customer_name">Nama Pelanggan</label>
+                <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ old('customer_name', $transaction->customer_name) }}" placeholder="Nama pelanggan" required>
+            </div>
+            <div class="form-group">
                 <label for="status">Status</label>
                 <select class="form-control" id="status" name="status" required>
                     <option value="pending" {{ old('status', $transaction->status) == 'pending' ? 'selected' : '' }}>Pending</option>
