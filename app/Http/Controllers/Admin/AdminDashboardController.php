@@ -32,16 +32,25 @@ class AdminDashboardController extends Controller
         foreach ($pendingTransactions as $transaction) {
             try {
                 $response = Http::withBasicAuth($serverKey, '')
+                    ->timeout(10)
                     ->get($baseUrl . '/v2/' . $transaction->order_id . '/status');
-
-                if (!$response->successful()) continue;
 
                 $body = $response->json();
                 $transactionStatus = $body['transaction_status'] ?? null;
                 $fraudStatus = $body['fraud_status'] ?? null;
 
+                Log::info('sync pending', [
+                    'order_id' => $transaction->order_id,
+                    'http_code' => $response->status(),
+                    'transaction_status' => $transactionStatus,
+                    'fraud_status' => $fraudStatus,
+                ]);
+
+                if (!$response->successful()) continue;
+
                 if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                     $transaction->update(['status' => 'lunas']);
+                    Log::info('sync: lunas', ['order_id' => $transaction->order_id]);
                 } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
                     $transaction->update(['status' => 'cancelled']);
                 }

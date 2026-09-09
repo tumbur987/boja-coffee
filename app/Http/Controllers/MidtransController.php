@@ -85,28 +85,40 @@ class MidtransController extends Controller
 
     public function notification(Request $request)
     {
+        Log::info('midtrans notification dipanggil', $request->all());
+
         $serverKey  = config('midtrans.server_key');
         $signature  = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
         if (!hash_equals($signature, (string) $request->signature_key)) {
+            Log::warning('midtrans notification: signature invalid', ['order_id' => $request->order_id]);
             return response()->json(['status' => 'invalid signature'], 403);
         }
 
         $transaction = Transaction::where('order_id', $request->order_id)->first();
 
         if (!$transaction) {
+            Log::warning('midtrans notification: order not found', ['order_id' => $request->order_id]);
             return response()->json(['status' => 'order not found'], 404);
         }
 
         if ((int) $request->gross_amount !== (int) $transaction->total_price) {
+            Log::warning('midtrans notification: amount mismatch', ['order_id' => $request->order_id]);
             return response()->json(['status' => 'amount mismatch'], 400);
         }
 
         $transactionStatus = $request->transaction_status;
         $fraudStatus       = $request->fraud_status;
 
+        Log::info('midtrans notification: status diterima', [
+            'order_id' => $request->order_id,
+            'transaction_status' => $transactionStatus,
+            'fraud_status' => $fraudStatus,
+        ]);
+
         if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
             $transaction->update(['status' => 'lunas']);
+            Log::info('midtrans notification: lunas', ['order_id' => $request->order_id]);
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
             $transaction->update(['status' => 'cancelled']);
         }
