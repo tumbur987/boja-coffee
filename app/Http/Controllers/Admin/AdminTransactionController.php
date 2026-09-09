@@ -82,7 +82,7 @@ class AdminTransactionController extends Controller
 $request->validate([
             'table_id'           => 'required|exists:tables,id',
             'customer_name'      => 'required|string|max:255',
-            'status'             => 'required|in:pending,lunas,cancelled',
+            'status'             => 'required|in:pending,lunas,selesai,cancelled',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
@@ -122,6 +122,12 @@ $request->validate([
         $transaction->items()->delete();
         $transaction->delete();
         return redirect()->route('transaction.index')->with('success', 'Transaksi berhasil dihapus.');
+    }
+
+    public function markSelesai(Transaction $transaction)
+    {
+        $transaction->update(['status' => 'selesai']);
+        return redirect()->route('transaction.index')->with('success', 'Pesanan ditandai selesai.');
     }
 
     private function syncPendingTransactions()

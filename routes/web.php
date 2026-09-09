@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('product', AdminProductController::class);
     Route::resource('table', AdminTableController::class);
     Route::resource('transaction', AdminTransactionController::class);
+    Route::post('transaction/{transaction}/selesai', [AdminTransactionController::class, 'markSelesai'])->name('transaction.selesai');
     Route::resource('user', AdminUserController::class);
 
     Route::get('setting', [AdminSettingController::class, 'index'])->name('setting.index');

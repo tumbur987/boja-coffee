@@ -37,6 +37,8 @@
                         <td>
                             @if ($transaction->status == 'lunas')
                                 <span class="badge badge-success">Lunas</span>
+                            @elseif ($transaction->status == 'selesai')
+                                <span class="badge badge-info">Selesai</span>
                             @elseif ($transaction->status == 'cancelled')
                                 <span class="badge badge-danger">Batal</span>
                             @else
@@ -44,6 +46,12 @@
                             @endif
                         </td>
                         <td>
+                            @if ($transaction->status == 'lunas')
+                                <form action="{{ route('transaction.selesai', $transaction) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-info btn-sm" title="Tandai Selesai"><i class="fas fa-check"></i></button>
+                                </form>
+                            @endif
                             <button class="btn btn-warning btn-sm btn-edit" data-id="{{ $transaction->id }}"><i class="fas fa-edit"></i></button>
                             <form action="{{ route('transaction.destroy', $transaction) }}" method="POST" class="d-inline delete-form">
                                 @csrf
@@ -142,6 +150,7 @@
                             <select class="form-control" id="edit-status" name="status" required>
                                 <option value="pending">Pending</option>
                                 <option value="lunas">Lunas</option>
+                                <option value="selesai">Selesai</option>
                                 <option value="cancelled">Dibatalkan</option>
                             </select>
                         </div>

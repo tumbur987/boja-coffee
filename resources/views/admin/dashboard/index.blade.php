@@ -92,6 +92,8 @@
                             <td>
                                 @if ($trx->status == 'lunas')
                                     <span class="badge badge-success">Lunas</span>
+                                @elseif ($trx->status == 'selesai')
+                                    <span class="badge badge-info">Selesai</span>
                                 @elseif ($trx->status == 'cancelled')
                                     <span class="badge badge-danger">Batal</span>
                                 @else
