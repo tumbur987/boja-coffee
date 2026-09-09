@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.sandbox.midtrans.com https://app.midtrans.com https://snap-assets.sandbox.midtrans.com https://snap-assets.midtrans.com https://api.sandbox.midtrans.com https://api.midtrans.com https://pay.google.com https://gwk.gopayapi.com https://www.googletagmanager.com https://o.alicdn.com https://g.alicdn.com https://fonts.googleapis.com https://cdnjs.cloudflare.com;">
     <title>{{ Setting::get('site_name', 'SiBoja') }} &mdash; Meja {{ $table->number }}</title>
     @if(!empty(Setting::get('site_favicon')))
         <link rel="icon" href="{{ asset('storage/' . Setting::get('site_favicon')) }}">
