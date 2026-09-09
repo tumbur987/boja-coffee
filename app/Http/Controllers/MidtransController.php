@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Midtrans\Snap;
 
@@ -137,13 +138,33 @@ class MidtransController extends Controller
             return response()->json(['success' => true, 'status' => 'lunas']);
         }
 
-        $transaction->update(['status' => 'lunas']);
+        try {
+            $serverKey = config('midtrans.server_key');
+            $isProduction = config('midtrans.is_production', false);
+            $baseUrl = $isProduction ? 'https://api.midtrans.com' : 'https://api.sandbox.midtrans.com';
 
-        Log::info('payment-status: BERHASIL lunas', ['order_id' => $orderId]);
+            $response = Http::withBasicAuth($serverKey, '')
+                ->get($baseUrl . '/v2/' . $orderId . '/status');
 
-        return response()->json([
-            'success' => true,
-            'status'  => 'lunas',
-        ]);
+            $body = $response->json();
+            $transactionStatus = $body['transaction_status'] ?? null;
+            $fraudStatus = $body['fraud_status'] ?? null;
+
+            Log::info('payment-status: midtrans response', [
+                'order_id' => $orderId,
+                'transaction_status' => $transactionStatus,
+                'fraud_status' => $fraudStatus,
+            ]);
+
+            if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
+                $transaction->update(['status' => 'lunas']);
+                Log::info('payment-status: BERHASIL lunas', ['order_id' => $orderId]);
+                return response()->json(['success' => true, 'status' => 'lunas']);
+            }
+        } catch (\Exception $e) {
+            Log::error('payment-status: gagal cek midtrans', ['order_id' => $orderId, 'error' => $e->getMessage()]);
+        }
+
+        return response()->json(['success' => false, 'status' => $transaction->status]);
     }
 }

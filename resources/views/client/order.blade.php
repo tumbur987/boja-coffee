@@ -442,8 +442,17 @@
                     pendingOrderId = data.order_id;
                     updateStatus('pending');
                     snap.pay(data.token, {
-                        onSuccess: function() {
-                            updateStatus('lunas');
+                        onSuccess: function(result) {
+                            fetch('/midtrans/payment-status', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ order_id: pendingOrderId })
+                            }).finally(function() {
+                                updateStatus('lunas');
+                            });
                         },
                         onPending: function() {
                             updateStatus('pending');
