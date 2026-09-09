@@ -72,6 +72,8 @@ class MidtransController extends Controller
             $snapToken = Snap::getSnapToken($params);
             return response()->json(['token' => $snapToken, 'order_id' => $orderId]);
         } catch (\Exception $e) {
+            $transaction->items()->delete();
+            $transaction->delete();
             Log::error('Midtrans Snap gagal: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
