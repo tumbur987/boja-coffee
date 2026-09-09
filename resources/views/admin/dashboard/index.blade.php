@@ -90,7 +90,7 @@
                             <td style="font-weight: 600;">{{ $trx->customer_name ?? '-' }}</td>
                             <td style="font-weight: 700;">Rp.{{ number_format($trx->total_price, 0, ',', '.') }}</td>
                             <td>
-                                @if ($trx->status == 'paid')
+                                @if ($trx->status == 'lunas')
                                     <span class="badge badge-success">Lunas</span>
                                 @elseif ($trx->status == 'cancelled')
                                     <span class="badge badge-danger">Batal</span>

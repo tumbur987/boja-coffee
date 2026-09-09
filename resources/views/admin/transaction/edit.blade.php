@@ -35,7 +35,7 @@
                 <label for="status">Status</label>
                 <select class="form-control" id="status" name="status" required>
                     <option value="pending" {{ old('status', $transaction->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="paid" {{ old('status', $transaction->status) == 'paid' ? 'selected' : '' }}>Lunas</option>
+                    <option value="lunas" {{ old('status', $transaction->status) == 'lunas' ? 'selected' : '' }}>Lunas</option>
                     <option value="cancelled" {{ old('status', $transaction->status) == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
                 </select>
             </div>

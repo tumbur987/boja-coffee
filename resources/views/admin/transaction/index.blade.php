@@ -35,7 +35,7 @@
                         </td>
                         <td style="font-weight:700; color:var(--coffee);">Rp.{{ number_format($transaction->total_price, 0, ',', '.') }}</td>
                         <td>
-                            @if ($transaction->status == 'paid')
+                            @if ($transaction->status == 'lunas')
                                 <span class="badge badge-success">Lunas</span>
                             @elseif ($transaction->status == 'cancelled')
                                 <span class="badge badge-danger">Batal</span>
@@ -141,7 +141,7 @@
                             <label>Status</label>
                             <select class="form-control" id="edit-status" name="status" required>
                                 <option value="pending">Pending</option>
-                                <option value="paid">Lunas</option>
+                                <option value="lunas">Lunas</option>
                                 <option value="cancelled">Dibatalkan</option>
                             </select>
                         </div>
