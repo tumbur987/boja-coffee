@@ -7,11 +7,14 @@ use App\Models\Table;
 use App\Models\Transaction;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AdminTransactionController extends Controller
 {
     public function index()
     {
+        $this->syncPendingTransactions();
         $transactions = Transaction::with(['table', 'items.product'])->latest()->get();
         $tables   = Table::orderBy('number')->get();
         $products = Product::with('category')->orderBy('name')->get();
@@ -119,5 +122,42 @@ $request->validate([
         $transaction->items()->delete();
         $transaction->delete();
         return redirect()->route('transaction.index')->with('success', 'Transaksi berhasil dihapus.');
+    }
+
+    private function syncPendingTransactions()
+    {
+        $pendingTransactions = Transaction::where('status', 'pending')
+            ->whereNotNull('order_id')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->get();
+
+        if ($pendingTransactions->isEmpty()) return;
+
+        $serverKey = config('midtrans.server_key');
+        $isProduction = config('midtrans.is_production', false);
+        $baseUrl = $isProduction ? 'https://api.midtrans.com' : 'https://api.sandbox.midtrans.com';
+
+        foreach ($pendingTransactions as $transaction) {
+            try {
+                $response = Http::withBasicAuth($serverKey, '')
+                    ->get($baseUrl . '/v2/' . $transaction->order_id . '/status');
+
+                if (!$response->successful()) continue;
+
+                $body = $response->json();
+                $transactionStatus = $body['transaction_status'] ?? null;
+                $fraudStatus = $body['fraud_status'] ?? null;
+
+                if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
+                    $transaction->update(['status' => 'lunas']);
+                    Log::info('sync: transaksi lunas', ['order_id' => $transaction->order_id]);
+                } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
+                    $transaction->update(['status' => 'cancelled']);
+                    Log::info('sync: transaksi dibatalkan', ['order_id' => $transaction->order_id]);
+                }
+            } catch (\Exception $e) {
+                Log::error('sync: gagal cek', ['order_id' => $transaction->order_id, 'error' => $e->getMessage()]);
+            }
+        }
     }
 }
