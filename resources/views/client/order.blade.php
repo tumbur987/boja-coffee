@@ -223,6 +223,10 @@
     <script src="https://app.sandbox.midtrans.com/snap/snap.js"
             data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script>
+        console.log('[INIT] Snap loaded:', typeof snap !== 'undefined');
+        console.log('[INIT] Client key:', '{{ config("midtrans.client_key") }}');
+        console.log('[INIT] Table ID:', {{ $table->id }}, 'Code:', '{{ $table->code }}');
+
         var tableId = {{ $table->id }};
         var tableCode = '{{ $table->code }}';
         var cart = {};
@@ -421,6 +425,8 @@
                 return;
             }
 
+            console.log('[ORDER] Submit order:', { table_id: tableId, customer_name: customerName, items: items });
+
             btns = [document.getElementById('cartBtn'), document.getElementById('drawerCheckoutBtn')];
             btns.forEach(function(btn) {
                 btn.disabled = true;
@@ -435,14 +441,20 @@
                 },
                 body: JSON.stringify({ table_id: tableId, customer_name: customerName, items: items })
             })
-            .then(function(r) { return r.json(); })
+            .then(function(r) {
+                console.log('[ORDER] Response HTTP status:', r.status);
+                return r.json();
+            })
             .then(function(data) {
+                console.log('[ORDER] Response data:', data);
                 resetBtns();
                 if (data.token && data.order_id) {
                     pendingOrderId = data.order_id;
+                    console.log('[ORDER] Snap token OK, order_id:', pendingOrderId);
                     updateStatus('pending');
                     snap.pay(data.token, {
                         onSuccess: function(result) {
+                            console.log('[SNAP] onSuccess:', result);
                             fetch('/midtrans/payment-status', {
                                 method: 'POST',
                                 headers: {
@@ -450,25 +462,37 @@
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                                 },
                                 body: JSON.stringify({ order_id: pendingOrderId })
-                            }).finally(function() {
+                            })
+                            .then(function(r) { return r.json(); })
+                            .then(function(res) {
+                                console.log('[PAYMENT-STATUS] response:', res);
+                                updateStatus('lunas');
+                            })
+                            .catch(function(err) {
+                                console.error('[PAYMENT-STATUS] error:', err);
                                 updateStatus('lunas');
                             });
                         },
-                        onPending: function() {
+                        onPending: function(result) {
+                            console.log('[SNAP] onPending:', result);
                             updateStatus('pending');
                         },
-                        onError: function() {
+                        onError: function(result) {
+                            console.log('[SNAP] onError:', result);
                             updateStatus('error');
                         },
                         onClose: function() {
+                            console.log('[SNAP] onClose - user tutup popup tanpa bayar');
                             startPolling();
                         }
                     });
                 } else {
+                    console.error('[ORDER] Gagal dapat token:', data);
                     showError(data.message || 'Terjadi kesalahan. Silakan coba lagi.');
                 }
             })
-            .catch(function() {
+            .catch(function(err) {
+                console.error('[ORDER] Fetch error:', err);
                 resetBtns();
                 showError('Gagal menghubungi server. Coba lagi.');
             });
@@ -483,6 +507,7 @@
         }
 
         function updateStatus(status) {
+            console.log('[STATUS] Update status:', status);
             if (status === 'lunas') {
                 document.getElementById('successTitle').textContent = 'Pembayaran Berhasil!';
                 document.getElementById('successDesc').textContent = 'Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.';
@@ -504,9 +529,11 @@
 
         function startPolling() {
             if (!pendingOrderId) return;
+            console.log('[POLLING] Mulai polling untuk order_id:', pendingOrderId);
             var attempt = 0;
             pollingTimer = setInterval(function() {
                 attempt++;
+                console.log('[POLLING] Attempt #' + attempt + ' untuk order_id:', pendingOrderId);
                 fetch('/midtrans/payment-status', {
                     method: 'POST',
                     headers: {
@@ -517,13 +544,17 @@
                 })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
+                    console.log('[POLLING] Response:', data);
                     if (data && data.success) {
+                        console.log('[POLLING] Pembayaran ditemukan! Status:', data.status);
                         updateStatus('lunas');
                     } else if (attempt >= 10) {
+                        console.log('[POLLING] Max attempts, status tetap pending');
                         updateStatus('pending');
                     }
                 })
-                .catch(function() {
+                .catch(function(err) {
+                    console.error('[POLLING] Error:', err);
                     if (attempt >= 10) {
                         updateStatus('pending');
                     }
