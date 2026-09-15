@@ -181,6 +181,7 @@
     <script>$.widget.bridge('uibutton', $.ui.button)</script>
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="plugins/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="dist/js/adminlte.js"></script>
     <script>
         @if (session('success'))

@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
+use App\Models\Product;
+use App\Models\TransactionItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +16,52 @@ class AdminDashboardController extends Controller
      public function index()
     {
         $this->syncPendingTransactions();
-        return view('admin.dashboard.index');
+
+        // Transaksi 7 hari terakhir
+        $dailyTransactions = Transaction::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as total'),
+            DB::raw('SUM(total_price) as revenue')
+        )
+        ->where('created_at', '>=', now()->subDays(7))
+        ->groupBy(DB::raw('DATE(created_at)'))
+        ->orderBy('date')
+        ->get();
+
+        $chartLabels = $dailyTransactions->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'));
+        $chartCounts = $dailyTransactions->pluck('total');
+        $chartRevenue = $dailyTransactions->pluck('revenue');
+
+        // Status transaksi
+        $statusCounts = Transaction::select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        // Menu terlaris
+        $topProducts = TransactionItem::select('product_id', DB::raw('SUM(quantity) as total_qty'))
+            ->whereHas('transaction', fn($q) => $q->where('status', '!=', 'cancelled'))
+            ->groupBy('product_id')
+            ->orderByDesc('total_qty')
+            ->limit(5)
+            ->with('product')
+            ->get();
+
+        $todayRevenue = Transaction::where('status', 'lunas')
+            ->whereDate('created_at', today())
+            ->sum('total_price');
+
+        $todayCount = Transaction::whereDate('created_at', today())->count();
+
+        $monthRevenue = Transaction::where('status', 'lunas')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_price');
+
+        return view('admin.dashboard.index', compact(
+            'chartLabels', 'chartCounts', 'chartRevenue',
+            'statusCounts', 'topProducts',
+            'todayRevenue', 'todayCount', 'monthRevenue'
+        ));
     }
 
     private function syncPendingTransactions()
