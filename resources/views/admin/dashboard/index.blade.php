@@ -97,7 +97,7 @@
                                 <span class="badge badge-danger" style="font-size: 12px; padding: 5px 10px;">Stok: {{ $product->stock }}</span>
                             </td>
                             <td>
-                                <a href="{{ route('admin.product.index') }}" class="btn btn-sm" style="background: var(--coffee); color: white; border-radius: 8px; font-weight: 600; font-size: 12px;">
+                                <a href="{{ route('product.index') }}" class="btn btn-sm" style="background: var(--coffee); color: white; border-radius: 8px; font-weight: 600; font-size: 12px;">
                                     <i class="fas fa-edit mr-1"></i> Restock
                                 </a>
                             </td>
