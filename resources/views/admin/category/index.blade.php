@@ -63,7 +63,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group mb-0">
-                            <label><i class="fas fa-tag mr-1"></i>Nama Kategori</label>
+                            <label>Nama Kategori</label>
                             <input type="text" class="form-control" name="name" placeholder="Contoh: Coffee Based" required>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group mb-0">
-                            <label><i class="fas fa-tag mr-1"></i>Nama Kategori</label>
+                            <label>Nama Kategori</label>
                             <input type="text" class="form-control" id="edit-name" name="name" required>
                         </div>
                     </div>

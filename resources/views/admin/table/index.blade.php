@@ -74,7 +74,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group mb-0">
-                            <label><i class="fas fa-chair mr-1"></i>Nomor Meja</label>
+                            <label>Nomor Meja</label>
                             <input type="text" class="form-control" name="number" placeholder="Contoh: 1" required>
                             <small class="text-muted">Kode akan digenerate otomatis (MJA001, MJA002, dst).</small>
                         </div>
@@ -101,7 +101,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group mb-0">
-                            <label><i class="fas fa-chair mr-1"></i>Nomor Meja</label>
+                            <label>Nomor Meja</label>
                             <input type="text" class="form-control" id="edit-number" name="number" required>
                         </div>
                     </div>

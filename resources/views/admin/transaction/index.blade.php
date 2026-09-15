@@ -91,7 +91,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group mb-0">
-                            <label><i class="fas fa-chair mr-1"></i>Meja</label>
+                            <label>Meja</label>
                             <select class="form-control" name="table_id" required>
                                 <option value="">-- Pilih Meja --</option>
                                 @foreach ($tables as $table)
@@ -100,7 +100,7 @@
                             </select>
                         </div>
                         <hr style="border-color:rgba(44,24,16,0.08); margin:16px 0;">
-                        <label style="font-weight:700; color:var(--coffee-dark); font-size:13px;"><i class="fas fa-list-ul mr-1" style="color:var(--coffee);"></i> Item Pesanan</label>
+                        <label style="font-weight:700; color:var(--coffee-dark); font-size:13px;">Item Pesanan</label>
                         <div id="create-items-container" class="mt-2">
                             <div class="item-card">
                                 <div class="row align-items-center">
@@ -147,7 +147,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-0">
-                                    <label><i class="fas fa-chair mr-1"></i>Meja</label>
+                                    <label>Meja</label>
                                     <select class="form-control" id="edit-table_id" name="table_id" required>
                                         <option value="">-- Pilih Meja --</option>
                                         @foreach ($tables as $table)
@@ -158,7 +158,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-0">
-                                    <label><i class="fas fa-flag mr-1"></i>Status</label>
+                                    <label>Status</label>
                                     <select class="form-control" id="edit-status" name="status" required>
                                         <option value="pending">Pending</option>
                                         <option value="lunas">Lunas</option>
@@ -169,7 +169,7 @@
                             </div>
                         </div>
                         <hr style="border-color:rgba(44,24,16,0.08); margin:16px 0;">
-                        <label style="font-weight:700; color:var(--coffee-dark); font-size:13px;"><i class="fas fa-list-ul mr-1" style="color:var(--coffee);"></i> Item Pesanan</label>
+                        <label style="font-weight:700; color:var(--coffee-dark); font-size:13px;">Item Pesanan</label>
                         <div id="edit-items-container" class="mt-2"></div>
                         <button type="button" class="btn btn-outline-success btn-sm mt-2" id="edit-add-item"><i class="fas fa-plus mr-1"></i> Tambah Item</button>
                     </div>

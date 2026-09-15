@@ -85,7 +85,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-folder mr-1"></i>Kategori</label>
+                                    <label>Kategori</label>
                                     <select class="form-control" name="category_id" required>
                                         <option value="">-- Pilih Kategori --</option>
                                         @foreach ($categories as $category)
@@ -96,7 +96,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-coffee mr-1"></i>Nama Menu</label>
+                                    <label>Nama Menu</label>
                                     <input type="text" class="form-control" name="name" placeholder="Contoh: Gula Aren" required>
                                 </div>
                             </div>
@@ -104,19 +104,19 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-box mr-1"></i>Stok</label>
+                                    <label>Stok</label>
                                     <input type="number" class="form-control" name="stock" min="0" value="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-money-bill mr-1"></i>Harga (Rp)</label>
+                                    <label>Harga (Rp)</label>
                                     <input type="number" class="form-control" name="price" min="0" placeholder="23000" required>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group mb-0">
-                            <label><i class="fas fa-image mr-1"></i>Gambar</label>
+                            <label>Gambar</label>
                             <input type="file" class="form-control" name="image" accept="image/*">
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-folder mr-1"></i>Kategori</label>
+                                    <label>Kategori</label>
                                     <select class="form-control" id="edit-category_id" name="category_id" required>
                                         <option value="">-- Pilih Kategori --</option>
                                         @foreach ($categories as $category)
@@ -155,7 +155,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-coffee mr-1"></i>Nama Menu</label>
+                                    <label>Nama Menu</label>
                                     <input type="text" class="form-control" id="edit-name" name="name" required>
                                 </div>
                             </div>
@@ -163,19 +163,19 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-box mr-1"></i>Stok</label>
+                                    <label>Stok</label>
                                     <input type="number" class="form-control" id="edit-stock" name="stock" min="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-money-bill mr-1"></i>Harga (Rp)</label>
+                                    <label>Harga (Rp)</label>
                                     <input type="number" class="form-control" id="edit-price" name="price" min="0" required>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group mb-0">
-                            <label><i class="fas fa-image mr-1"></i>Gambar <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
+                            <label>Gambar <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
                             <input type="file" class="form-control" name="image" accept="image/*">
                             <div id="edit-image-preview" class="mt-2" style="display:none;">
                                 <img id="edit-image-img" src="" alt="" width="80" height="80" style="border-radius:8px; object-fit:cover;">

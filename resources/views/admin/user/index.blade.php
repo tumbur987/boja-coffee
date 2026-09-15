@@ -86,23 +86,23 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label><i class="fas fa-user mr-1"></i>Nama</label>
+                            <label>Nama</label>
                             <input type="text" class="form-control" name="name" required>
                         </div>
                         <div class="form-group">
-                            <label><i class="fas fa-envelope mr-1"></i>Email</label>
+                            <label>Email</label>
                             <input type="email" class="form-control" name="email" required>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-lock mr-1"></i>Password</label>
+                                    <label>Password</label>
                                     <input type="password" class="form-control" name="password" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-lock mr-1"></i>Konfirmasi</label>
+                                    <label>Konfirmasi</label>
                                     <input type="password" class="form-control" name="password_confirmation" required>
                                 </div>
                             </div>
@@ -110,7 +110,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-0">
-                                    <label><i class="fas fa-shield-alt mr-1"></i>Role</label>
+                                    <label>Role</label>
                                     <select class="form-control" name="role" required>
                                         <option value="user">User</option>
                                         <option value="admin">Admin</option>
@@ -119,7 +119,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-0">
-                                    <label><i class="fas fa-toggle-on mr-1"></i>Status</label>
+                                    <label>Status</label>
                                     <select class="form-control" name="status" required>
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
@@ -150,23 +150,23 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label><i class="fas fa-user mr-1"></i>Nama</label>
+                            <label>Nama</label>
                             <input type="text" class="form-control" id="edit-name" name="name" required>
                         </div>
                         <div class="form-group">
-                            <label><i class="fas fa-envelope mr-1"></i>Email</label>
+                            <label>Email</label>
                             <input type="email" class="form-control" id="edit-email" name="email" required>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-lock mr-1"></i>Password <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
+                                    <label>Password <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
                                     <input type="password" class="form-control" name="password">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label><i class="fas fa-lock mr-1"></i>Konfirmasi</label>
+                                    <label>Konfirmasi</label>
                                     <input type="password" class="form-control" name="password_confirmation">
                                 </div>
                             </div>
@@ -174,7 +174,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-0">
-                                    <label><i class="fas fa-shield-alt mr-1"></i>Role</label>
+                                    <label>Role</label>
                                     <select class="form-control" id="edit-role" name="role" required>
                                         <option value="user">User</option>
                                         <option value="admin">Admin</option>
@@ -183,7 +183,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-0">
-                                    <label><i class="fas fa-toggle-on mr-1"></i>Status</label>
+                                    <label>Status</label>
                                     <select class="form-control" id="edit-status" name="status" required>
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
