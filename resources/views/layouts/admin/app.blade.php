@@ -98,7 +98,7 @@
         .modal { z-index: 1050 !important; }
         .modal-open .wrapper { overflow: visible !important; }
         .modal-open .content-wrapper { overflow: visible !important; }
-        .modal-content { border: none !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important; width: 100% !important; }
+        .modal-content { border: none !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important; width: 100% !important; animation: modalIn 0.25s ease-out; }
         .modal-header { border-bottom: 1px solid rgba(44,24,16,0.06) !important; padding: 18px 24px !important; }
         .modal-header .modal-title { font-weight: 700 !important; color: var(--coffee-dark) !important; font-size: 17px !important; }
         .modal-header .close { font-size: 22px !important; padding: 4px 8px !important; border-radius: var(--radius-xs) !important; transition: all 0.2s !important; }
@@ -138,6 +138,7 @@
 
         /* Animation */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .content > .container-fluid > .card { animation: fadeInUp 0.3s ease-out; }
 
         /* Item card (transaction modal) */
