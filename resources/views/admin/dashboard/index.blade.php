@@ -90,6 +90,19 @@
 </div>
 
 <div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title" style="font-weight: 800;"><i class="fas fa-users mr-1" style="color: var(--coffee);"></i> Jumlah Pengunjung (30 Hari Terakhir)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="visitorChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
@@ -156,6 +169,8 @@
     const revenue = {!! json_encode($chartRevenue->toArray()) !!};
     const statusData = {!! json_encode($statusCounts) !!};
     const topProducts = {!! json_encode($topProducts->map(fn($tp) => ['name' => $tp->product->name ?? '-', 'qty' => $tp->total_qty])) !!};
+    const visitorLabels = {!! json_encode($visitorLabels) !!};
+    const visitorCounts = {!! json_encode($visitorCounts->toArray()) !!};
 
     const coffeeDark = '#2c1810';
     const coffee = '#4a2c2a';
@@ -296,6 +311,54 @@
             scales: {
                 x: { grid: { color: 'rgba(44,24,16,0.05)' }, ticks: { font: { weight: '600' } } },
                 y: { grid: { display: false }, ticks: { font: { weight: '600', size: 12 } } }
+            }
+        }
+    });
+
+    // Bar chart - Pengunjung 30 hari
+    new Chart(document.getElementById('visitorChart'), {
+        type: 'bar',
+        data: {
+            labels: visitorLabels,
+            datasets: [{
+                label: 'Pengunjung',
+                data: visitorCounts,
+                backgroundColor: function(ctx) {
+                    const chart = ctx.chart;
+                    const {ctx: canvasCtx, chartArea} = chart;
+                    if (!chartArea) return coffee;
+                    const gradient = canvasCtx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                    gradient.addColorStop(0, 'rgba(74,44,42,0.4)');
+                    gradient.addColorStop(1, coffee);
+                    return gradient;
+                },
+                borderRadius: 6,
+                borderSkipped: false,
+                maxBarThickness: 24
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: coffeeDark,
+                    titleFont: { weight: '700' },
+                    callbacks: {
+                        label: ctx => ctx.raw + ' pengunjung'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(44,24,16,0.05)' },
+                    ticks: { font: { weight: '600' }, stepSize: 1 }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { weight: '600', size: 11 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }
+                }
             }
         }
     });

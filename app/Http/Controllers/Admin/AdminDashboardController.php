@@ -57,10 +57,24 @@ class AdminDashboardController extends Controller
             ->whereYear('created_at', now()->year)
             ->sum('total_price');
 
+        // Pengunjung 30 hari terakhir (berdasarkan jumlah transaksi per hari)
+        $dailyVisitors = Transaction::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as total')
+        )
+        ->where('created_at', '>=', now()->subDays(30))
+        ->groupBy(DB::raw('DATE(created_at)'))
+        ->orderBy('date')
+        ->get();
+
+        $visitorLabels = $dailyVisitors->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'));
+        $visitorCounts = $dailyVisitors->pluck('total');
+
         return view('admin.dashboard.index', compact(
             'chartLabels', 'chartCounts', 'chartRevenue',
             'statusCounts', 'topProducts',
-            'todayRevenue', 'todayCount', 'monthRevenue'
+            'todayRevenue', 'todayCount', 'monthRevenue',
+            'visitorLabels', 'visitorCounts'
         ));
     }
 
