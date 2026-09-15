@@ -27,10 +27,12 @@ class AdminProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name'        => 'required|string|max:255',
+            'name'        => 'required|string|max:255|unique:products,name',
             'stock'       => 'required|integer|min:0',
             'price'       => 'required|integer|min:0',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            'name.unique' => 'Nama produk sudah ada. Silakan gunakan nama lain.',
         ]);
 
         if ($request->hasFile('image')) {
@@ -61,10 +63,12 @@ class AdminProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name'        => 'required|string|max:255',
+            'name'        => 'required|string|max:255|unique:products,name,' . $product->id,
             'stock'       => 'required|integer|min:0',
             'price'       => 'required|integer|min:0',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            'name.unique' => 'Nama produk sudah ada. Silakan gunakan nama lain.',
         ]);
 
         $data = collect($validated)->except(['image'])->toArray();

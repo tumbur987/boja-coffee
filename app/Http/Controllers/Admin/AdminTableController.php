@@ -28,7 +28,10 @@ class AdminTableController extends Controller
                 'number' => 'required|string|max:255|unique:tables,number',
                 'code'   => 'unique:tables,code',
             ],
-            ['code.unique' => 'Nomor meja ini sudah digunakan.']
+            [
+                'number.unique' => 'Nomor meja ini sudah ada. Silakan gunakan nomor lain.',
+                'code.unique'   => 'Kode meja ini sudah digunakan.',
+            ]
         );
 
         $code = 'MJA' . str_pad($validated['number'], 3, '0', STR_PAD_LEFT);
@@ -56,7 +59,10 @@ class AdminTableController extends Controller
                 'number' => 'required|string|max:255|unique:tables,number,' . $table->id,
                 'code'   => 'unique:tables,code,' . $table->id,
             ],
-            ['code.unique' => 'Nomor meja ini sudah digunakan.']
+            [
+                'number.unique' => 'Nomor meja ini sudah ada. Silakan gunakan nomor lain.',
+                'code.unique'   => 'Kode meja ini sudah digunakan.',
+            ]
         );
 
         $code = 'MJA' . str_pad($validated['number'], 3, '0', STR_PAD_LEFT);

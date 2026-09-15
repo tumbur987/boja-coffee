@@ -21,7 +21,10 @@ class AdminCategoryController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate(['name' => 'required|string|max:255']);
+        $validated = $request->validate(
+            ['name' => 'required|string|max:255|unique:categories,name'],
+            ['name.unique' => 'Nama kategori sudah ada. Silakan gunakan nama lain.']
+        );
         Category::create($validated);
         return redirect()->route('category.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
@@ -38,7 +41,10 @@ class AdminCategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $validated = $request->validate(['name' => 'required|string|max:255']);
+        $validated = $request->validate(
+            ['name' => 'required|string|max:255|unique:categories,name,' . $category->id],
+            ['name.unique' => 'Nama kategori sudah ada. Silakan gunakan nama lain.']
+        );
         $category->update($validated);
         return redirect()->route('category.index')->with('success', 'Kategori berhasil diperbarui.');
     }

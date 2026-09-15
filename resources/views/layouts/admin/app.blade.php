@@ -234,6 +234,17 @@
                 timerProgressBar: true
             });
         @endif
+        @if ($errors->any())
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: '{!! implode('<br>', $errors->all()) !!}',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true
+            });
+        @endif
         function alertSuccess(msg) {
             Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: msg, showConfirmButton: false, timer: 3000, timerProgressBar: true });
         }
