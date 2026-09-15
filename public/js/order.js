@@ -413,7 +413,8 @@
 
     function loadHistory() {
         var name = getCustomerName();
-        var url = '/api/order-history/' + tableId + '?since=' + encodeURIComponent(pageLoadedAt);
+        var url = '/api/order-history/' + tableId;
+        if (name) url += '?customer_name=' + encodeURIComponent(name);
         if (name) url += '&customer_name=' + encodeURIComponent(name);
         var container = document.getElementById('historyList');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';

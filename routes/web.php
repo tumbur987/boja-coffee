@@ -64,17 +64,12 @@ Route::get('/api/order-status/{orderId}', function ($orderId) {
 // API for client order history
 Route::get('/api/order-history/{tableId}', function ($tableId) {
     $customerName = request('customer_name');
-    $since = request('since');
     $query = Transaction::with(['items.product', 'table'])
         ->where('table_id', $tableId)
         ->latest();
 
     if ($customerName) {
         $query->where('customer_name', $customerName);
-    }
-
-    if ($since) {
-        $query->where('created_at', '>=', $since);
     }
 
     $transactions = $query->limit(20)->get()->map(function ($t) {
