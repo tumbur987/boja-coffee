@@ -118,6 +118,7 @@ class MidtransController extends Controller
 
         if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
             $transaction->update(['status' => 'lunas']);
+            $this->deductStock($transaction);
             Log::info('midtrans notification: lunas', ['order_id' => $request->order_id]);
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
             $transaction->update(['status' => 'cancelled']);
@@ -170,6 +171,7 @@ class MidtransController extends Controller
 
             if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                 $transaction->update(['status' => 'lunas']);
+                $this->deductStock($transaction);
                 Log::info('payment-status: BERHASIL lunas', ['order_id' => $orderId]);
                 return response()->json(['success' => true, 'status' => 'lunas']);
             }
@@ -178,5 +180,20 @@ class MidtransController extends Controller
         }
 
         return response()->json(['success' => false, 'status' => $transaction->status]);
+    }
+
+    private function deductStock(Transaction $transaction)
+    {
+        $transaction->load('items.product');
+        foreach ($transaction->items as $item) {
+            if ($item->product) {
+                $item->product->decrement('stock', $item->quantity);
+                Log::info('stock dikurangi', [
+                    'product' => $item->product->name,
+                    'qty' => $item->quantity,
+                    'sisa' => $item->product->stock
+                ]);
+            }
+        }
     }
 }

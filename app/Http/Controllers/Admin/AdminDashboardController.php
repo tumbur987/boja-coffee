@@ -119,12 +119,28 @@ class AdminDashboardController extends Controller
 
                 if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                     $transaction->update(['status' => 'lunas']);
+                    $this->deductStock($transaction);
                     Log::info('sync: lunas', ['order_id' => $transaction->order_id]);
                 } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
                     $transaction->update(['status' => 'cancelled']);
                 }
             } catch (\Exception $e) {
                 Log::error('dashboard sync: gagal cek', ['order_id' => $transaction->order_id, 'error' => $e->getMessage()]);
+            }
+        }
+    }
+
+    private function deductStock(Transaction $transaction)
+    {
+        $transaction->load('items.product');
+        foreach ($transaction->items as $item) {
+            if ($item->product) {
+                $item->product->decrement('stock', $item->quantity);
+                Log::info('stock dikurangi (sync)', [
+                    'product' => $item->product->name,
+                    'qty' => $item->quantity,
+                    'sisa' => $item->product->stock
+                ]);
             }
         }
     }
