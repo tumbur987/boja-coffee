@@ -39,8 +39,9 @@
             --radius-sm: 8px;
             --radius-xs: 6px;
         }
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: var(--text); }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+        td, th { overflow: visible !important; white-space: normal !important; }
 
         /* Sidebar */
         .main-sidebar { background: linear-gradient(180deg, var(--coffee-dark) 0%, var(--coffee) 100%) !important; border-right: none !important; }
@@ -49,7 +50,7 @@
         .sidebar-dark-primary .user-panel { border-bottom: 1px solid rgba(255,255,255,0.08); }
         .sidebar-dark-primary .user-panel a { color: rgba(255,255,255,0.85) !important; font-weight: 600; }
         .sidebar-dark-primary .user-panel .image img { border: 2px solid var(--cream); }
-        .nav-sidebar > .nav-item > .nav-link { border-radius: var(--radius-sm) !important; margin: 2px 10px !important; padding: 10px 16px !important; color: rgba(255,255,255,0.65) !important; font-weight: 500 !important; transition: all 0.2s; }
+        .nav-sidebar > .nav-item > .nav-link { border-radius: var(--radius-sm) !important; margin: 2px 10px !important; padding: 10px 16px !important; color: rgba(255,255,255,0.65) !important; font-weight: 500 !important; transition: all 0.2s; white-space: nowrap !important; overflow: visible !important; }
         .nav-sidebar > .nav-item > .nav-link:hover { background: rgba(212,165,116,0.15) !important; color: var(--cream) !important; }
         .nav-sidebar > .nav-item > .nav-link.active { background: var(--cream) !important; color: var(--coffee-dark) !important; box-shadow: 0 4px 12px rgba(212,165,116,0.3) !important; font-weight: 700 !important; }
         .nav-sidebar > .nav-item > .nav-link.active .nav-icon { color: var(--coffee-dark) !important; }
@@ -88,16 +89,16 @@
         .btn-sm { padding: 6px 12px !important; font-size: 12px !important; }
 
         /* Forms */
-        .form-control { border-radius: var(--radius-xs) !important; border: 2px solid rgba(44,24,16,0.1) !important; padding: 10px 14px !important; font-size: 14px !important; transition: all 0.2s !important; }
+        .form-control { border-radius: var(--radius-xs) !important; border: 2px solid rgba(44,24,16,0.1) !important; padding: 10px 14px !important; font-size: 14px !important; transition: all 0.2s !important; height: auto !important; line-height: 1.5 !important; }
         .form-control:focus { border-color: var(--cream) !important; box-shadow: 0 0 0 3px rgba(212,165,116,0.15) !important; }
         .form-group label { font-weight: 600 !important; color: var(--coffee-dark) !important; font-size: 13px !important; margin-bottom: 6px !important; }
-        select.form-control { appearance: auto !important; }
+        select.form-control { min-height: 42px !important; }
 
         /* Modals */
         .modal { z-index: 1050 !important; }
         .modal-open .wrapper { overflow: visible !important; }
         .modal-open .content-wrapper { overflow: visible !important; }
-        .modal-content { border: none !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important; }
+        .modal-content { border: none !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important; width: 100% !important; }
         .modal-header { border-bottom: 1px solid rgba(44,24,16,0.06) !important; padding: 18px 24px !important; }
         .modal-header .modal-title { font-weight: 700 !important; color: var(--coffee-dark) !important; font-size: 17px !important; }
         .modal-header .close { font-size: 22px !important; padding: 4px 8px !important; border-radius: var(--radius-xs) !important; transition: all 0.2s !important; }
@@ -108,7 +109,7 @@
         .modal-backdrop.show { backdrop-filter: blur(4px); background: rgba(44,24,16,0.4) !important; }
 
         /* Badges */
-        .badge { font-weight: 600 !important; padding: 5px 10px !important; border-radius: 6px !important; font-size: 11px !important; }
+        .badge { font-weight: 600 !important; padding: 5px 10px !important; border-radius: 6px !important; font-size: 11px !important; white-space: normal !important; line-height: 1.4 !important; }
         .badge-primary { background: rgba(74,44,42,0.1) !important; color: var(--coffee) !important; }
         .badge-success { background: rgba(34,197,94,0.1) !important; color: #16a34a !important; }
         .badge-danger { background: rgba(239,68,68,0.1) !important; color: #dc2626 !important; }
