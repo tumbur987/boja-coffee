@@ -49,7 +49,7 @@ Route::get('/order/{code}', [OrderController::class, 'index'])->name('order.inde
 
 // API for client menu
 Route::get('/api/menu', function () {
-    return response()->json(Product::with('category')->where('stock', '>', 0)->get());
+    return response()->json(Product::with('category')->get());
 });
 
 // API for client order status check

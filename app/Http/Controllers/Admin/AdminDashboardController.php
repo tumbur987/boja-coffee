@@ -70,11 +70,15 @@ class AdminDashboardController extends Controller
         $visitorLabels = $dailyVisitors->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'));
         $visitorCounts = $dailyVisitors->pluck('total');
 
+        // Produk stok habis
+        $outOfStockProducts = Product::where('stock', '<=', 0)->get();
+
         return view('admin.dashboard.index', compact(
             'chartLabels', 'chartCounts', 'chartRevenue',
             'statusCounts', 'topProducts',
             'todayRevenue', 'todayCount', 'monthRevenue',
-            'visitorLabels', 'visitorCounts'
+            'visitorLabels', 'visitorCounts',
+            'outOfStockProducts'
         ));
     }
 

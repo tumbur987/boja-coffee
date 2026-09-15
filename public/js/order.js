@@ -10,9 +10,40 @@
     var pendingOrderId = null;
     var pollingTimer = null;
     var readyPollingTimer = null;
+    var stockPollingTimer = null;
     var lastCustomerName = '';
     var pageLoadedAt = new Date().toISOString();
     var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
+
+    function showToast(message, icon) {
+        var existing = document.getElementById('stockToast');
+        if (existing) existing.remove();
+        var toast = document.createElement('div');
+        toast.id = 'stockToast';
+        toast.style.cssText = 'position:fixed; top:20px; right:20px; z-index:99999; background:#fff; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.15); padding:16px 20px; display:flex; align-items:center; gap:12px; max-width:360px; animation:toastIn 0.3s ease-out; font-family:inherit;';
+        toast.innerHTML = '<div style="font-size:24px;">' + (icon || '&#9888;') + '</div><div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#2c1810; margin-bottom:2px;">Menu tidak tersedia</div><div style="font-size:13px; color:#8b7355; line-height:1.4;">' + message + '</div></div><button onclick="this.parentElement.remove()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#8b7355; padding:4px;">&times;</button>';
+        document.body.appendChild(toast);
+        setTimeout(function() {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100px)';
+                toast.style.transition = 'all 0.3s ease-in';
+                setTimeout(function() { if (toast.parentElement) toast.remove(); }, 300);
+            }
+        }, 4000);
+    }
+
+    var style = document.createElement('style');
+    style.textContent = '@keyframes toastIn { from { opacity:0; transform:translateX(100px); } to { opacity:1; transform:translateX(0); } }';
+    document.head.appendChild(style);
+
+    function isOutOfStock(product) {
+        return product.stock <= 0;
+    }
+
+    function getFilteredProducts() {
+        return activeCategory === 'all' ? allProducts : allProducts.filter(function(p) { return p.category_id == activeCategory; });
+    }
 
     fetch('/api/menu')
     .then(function(r) { return r.json(); })
@@ -20,6 +51,7 @@
         allProducts = data;
         renderTabs(data);
         renderMenu(data);
+        startStockPolling();
     });
 
     function renderTabs(products) {
@@ -43,8 +75,7 @@
     }
 
     function filterMenu() {
-        var filtered = activeCategory === 'all' ? allProducts : allProducts.filter(function(p) { return p.category_id == activeCategory; });
-        renderMenu(filtered);
+        renderMenu(getFilteredProducts());
     }
 
     function renderMenu(products) {
@@ -56,21 +87,33 @@
         container.innerHTML = '';
         products.forEach(function(p, i) {
             var qty = cart[p.id] || 0;
+            var outOfStock = isOutOfStock(p);
             var card = document.createElement('div');
-            card.className = 'menu-card';
+            card.className = 'menu-card' + (outOfStock ? ' menu-habis' : '');
+            card.setAttribute('data-id', p.id);
+
+            var qtyHtml = outOfStock
+                ? '<div class="qty-control"><button class="qty-btn" disabled style="opacity:0.3;"><i class="fas fa-plus" style="font-size:10px;"></i></button></div>'
+                : '<div class="qty-control">' +
+                    '<button class="qty-btn" onclick="changeQty(' + p.id + ', -1)"><i class="fas fa-minus" style="font-size:10px;"></i></button>' +
+                    '<span class="qty-num" id="qty-' + p.id + '">' + qty + '</span>' +
+                    '<button class="qty-btn" onclick="changeQty(' + p.id + ', 1)"><i class="fas fa-plus" style="font-size:10px;"></i></button>' +
+                  '</div>';
+
+            var badgeHtml = outOfStock ? '<div class="habis-badge">HABIS</div>' : '';
+            var stockInfo = !outOfStock ? '<div class="menu-stock">Stok: ' + p.stock + '</div>' : '';
+
             card.innerHTML =
                 '<div class="menu-left">' +
                     '<div class="menu-emoji">' + emojis[i % emojis.length] + '</div>' +
                     '<div class="menu-name">' + p.name + '</div>' +
                     '<div class="menu-cat">' + (p.category ? p.category.name : '') + '</div>' +
+                    stockInfo +
                     '<div class="menu-price">Rp' + new Intl.NumberFormat('id-ID').format(p.price) + '</div>' +
                 '</div>' +
                 '<div class="menu-right">' +
-                    '<div class="qty-control">' +
-                        '<button class="qty-btn" onclick="changeQty(' + p.id + ', -1)"><i class="fas fa-minus" style="font-size:10px;"></i></button>' +
-                        '<span class="qty-num" id="qty-' + p.id + '">' + qty + '</span>' +
-                        '<button class="qty-btn" onclick="changeQty(' + p.id + ', 1)"><i class="fas fa-plus" style="font-size:10px;"></i></button>' +
-                    '</div>' +
+                    badgeHtml +
+                    qtyHtml +
                 '</div>';
             container.appendChild(card);
         });
@@ -79,8 +122,13 @@
     var MAX_QTY = 50;
 
     window.changeQty = function(productId, delta) {
+        var product = allProducts.find(function(p) { return p.id === productId; });
+        if (product && isOutOfStock(product)) {
+            showToast(product.name + ' sedang habis. Silakan pilih menu lain.');
+            return;
+        }
         var newQty = (cart[productId] || 0) + delta;
-        if (newQty > MAX_QTY) { newQty = MAX_QTY; alert('Maksimal 50 item per produk.'); }
+        if (newQty > MAX_QTY) { newQty = MAX_QTY; showToast('Maksimal 50 item per produk.'); }
         if (newQty <= 0) { delete cart[productId]; } else { cart[productId] = newQty; }
         var el = document.getElementById('qty-' + productId);
         if (el) el.textContent = cart[productId] || 0;
@@ -98,8 +146,9 @@
 
     function updateCart() {
         var count = 0, total = 0;
-        allProducts.forEach(function(p) {
-            if (cart[p.id]) { count += cart[p.id]; total += p.price * cart[p.id]; }
+        Object.keys(cart).forEach(function(pid) {
+            var product = allProducts.find(function(p) { return p.id === parseInt(pid); });
+            if (product && cart[pid]) { count += cart[pid]; total += product.price * cart[pid]; }
         });
         var bar = document.getElementById('cartBar');
         if (count > 0) {
@@ -128,22 +177,24 @@
         var itemsHtml = '';
         var count = 0, total = 0;
         var order = [];
-        allProducts.forEach(function(p) {
-            if (cart[p.id]) {
-                count += cart[p.id];
-                var subtotal = p.price * cart[p.id];
+        Object.keys(cart).forEach(function(pid) {
+            var product = allProducts.find(function(p) { return p.id === parseInt(pid); });
+            if (product && cart[pid]) {
+                count += cart[pid];
+                var subtotal = product.price * cart[pid];
                 total += subtotal;
-                order.push({ product: p, qty: cart[p.id], subtotal: subtotal });
+                order.push({ product: product, qty: cart[pid], subtotal: subtotal });
             }
         });
         document.getElementById('drawerEmpty').style.display = count > 0 ? 'none' : 'block';
         document.getElementById('drawerFooter').style.display = count > 0 ? 'block' : 'none';
         if (count > 0) {
             order.forEach(function(o) {
+                var outOfStock = isOutOfStock(o.product);
                 itemsHtml +=
                     '<div class="cart-item">' +
                         '<div class="cart-item-info">' +
-                            '<div class="cart-item-name">' + o.product.name + '</div>' +
+                            '<div class="cart-item-name">' + o.product.name + (outOfStock ? ' <span style="color:#ef4444; font-size:11px;">(HABIS)</span>' : '') + '</div>' +
                             '<div class="cart-item-price">Rp' + new Intl.NumberFormat('id-ID').format(o.product.price) + ' x ' + o.qty + '</div>' +
                         '</div>' +
                         '<div class="cart-item-actions">' +
@@ -166,7 +217,7 @@
         cart = {};
         updateCart();
         renderDrawer();
-        renderMenu(activeCategory === 'all' ? allProducts : allProducts.filter(function(p) { return p.category_id == activeCategory; }));
+        renderMenu(getFilteredProducts());
     };
 
     function getCustomerName() {
@@ -177,11 +228,36 @@
 
     window.submitOrder = function() {
         var items = [];
-        Object.keys(cart).forEach(function(pid) { items.push({ product_id: parseInt(pid), quantity: cart[pid] }); });
+        var outOfStockItems = [];
+        Object.keys(cart).forEach(function(pid) {
+            var product = allProducts.find(function(p) { return p.id === parseInt(pid); });
+            if (product) {
+                if (isOutOfStock(product)) {
+                    outOfStockItems.push(product.name);
+                } else {
+                    items.push({ product_id: product.id, quantity: cart[pid] });
+                }
+            }
+        });
+
+        if (outOfStockItems.length > 0) {
+            showToast(outOfStockItems.join(', ') + ' baru saja habis. Silakan pilih menu lainnya.');
+            outOfStockItems.forEach(function(name) {
+                Object.keys(cart).forEach(function(pid) {
+                    var product = allProducts.find(function(p) { return p.id === parseInt(pid); });
+                    if (product && product.name === name) { delete cart[pid]; }
+                });
+            });
+            updateCart();
+            renderMenu(getFilteredProducts());
+            if (document.getElementById('cartDrawer').classList.contains('show')) renderDrawer();
+            return;
+        }
+
         if (items.length === 0) return;
         var nameInput = document.getElementById('customerName');
         var cname = nameInput ? nameInput.value.trim() : '';
-        if (!cname) { alert('Mohon isi nama Anda.'); openDrawer(); nameInput.focus(); return; }
+        if (!cname) { showToast('Mohon isi nama Anda.'); openDrawer(); nameInput.focus(); return; }
         lastCustomerName = cname;
 
         var btns = [document.getElementById('cartBtn'), document.getElementById('drawerCheckoutBtn')];
@@ -200,6 +276,9 @@
                 pendingOrderId = data.order_id;
                 updateStatus('pending');
                 refreshHistory();
+                cart = {};
+                updateCart();
+                renderMenu(getFilteredProducts());
                 snap.pay(data.token, {
                     onSuccess: function() {
                         fetch('/midtrans/payment-status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken }, body: JSON.stringify({ order_id: pendingOrderId }) })
@@ -212,13 +291,13 @@
                     onClose: function() { startPaymentPolling(); }
                 });
             } else {
-                alert(data.message || 'Terjadi kesalahan.');
+                showToast(data.message || 'Terjadi kesalahan.');
             }
         })
         .catch(function() {
             btns.forEach(function(btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang'; });
             document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
-            alert('Gagal menghubungi server.');
+            showToast('Gagal menghubungi server.');
         });
     };
 
@@ -272,6 +351,30 @@
     }
 
     function stopReadyPolling() { if (readyPollingTimer) { clearInterval(readyPollingTimer); readyPollingTimer = null; } }
+
+    function startStockPolling() {
+        stockPollingTimer = setInterval(function() {
+            fetch('/api/menu')
+            .then(function(r) { return r.json(); })
+            .then(function(newData) {
+                var oldProducts = allProducts.slice();
+                allProducts = newData;
+                oldProducts.forEach(function(oldP) {
+                    var newP = newData.find(function(p) { return p.id === oldP.id; });
+                    if (newP && oldP.stock > 0 && newP.stock <= 0) {
+                        showToast(newP.name + ' baru saja habis. Silakan pilih menu lainnya.');
+                        if (cart[newP.id]) {
+                            delete cart[newP.id];
+                            updateCart();
+                        }
+                    }
+                });
+                renderMenu(getFilteredProducts());
+                if (document.getElementById('cartDrawer').classList.contains('show')) renderDrawer();
+            })
+            .catch(function() {});
+        }, 15000);
+    }
 
     function playNotifSound() {
         try {

@@ -53,12 +53,16 @@
         .menu-list { padding: 4px 16px; }
         .menu-card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid rgba(44,24,16,0.04); transition: all 0.2s; }
         .menu-card:hover { box-shadow: var(--shadow-lg); }
+        .menu-card.menu-habis { opacity: 0.55; pointer-events: none; filter: grayscale(30%); }
+        .menu-card.menu-habis .menu-price { color: var(--text-light); text-decoration: line-through; }
+        .habis-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .menu-stock { font-size: 11px; color: var(--text-light); font-weight: 500; margin-bottom: 4px; }
         .menu-left { flex: 1; min-width: 0; }
         .menu-emoji { font-size: 24px; margin-bottom: 4px; }
         .menu-name { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
         .menu-cat { font-size: 11px; color: var(--text-light); font-weight: 500; margin-bottom: 6px; }
         .menu-price { font-size: 16px; font-weight: 800; color: var(--coffee); }
-        .menu-right { flex-shrink: 0; }
+        .menu-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 
         .qty-control { display: flex; align-items: center; gap: 0; background: var(--cream-lighter); border-radius: 12px; overflow: hidden; border: 2px solid rgba(74,44,42,0.08); }
         .qty-btn { width: 36px; height: 36px; border: none; background: transparent; color: var(--coffee); font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
