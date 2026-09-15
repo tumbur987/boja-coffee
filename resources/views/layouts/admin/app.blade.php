@@ -99,7 +99,7 @@
         .modal-header .modal-title { font-weight: 700 !important; color: var(--coffee-dark) !important; font-size: 17px !important; }
         .modal-header .close { font-size: 22px !important; padding: 4px 8px !important; border-radius: var(--radius-xs) !important; transition: all 0.2s !important; }
         .modal-header .close:hover { background: var(--cream-lighter) !important; }
-        .modal-body { padding: 24px !important; }
+        .modal-body { padding: 24px !important; overflow-y: auto; }
         .modal-footer { border-top: 1px solid rgba(44,24,16,0.06) !important; padding: 16px 24px !important; }
         .modal-backdrop.show { backdrop-filter: blur(4px); background: rgba(44,24,16,0.4) !important; }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -137,9 +137,10 @@
         .content .card { animation: fadeInUp 0.3s ease-out; }
 
         /* Item card (transaction modal) */
-        .item-card { background: var(--cream-lighter); border: 1px solid rgba(44,24,16,0.06); border-radius: var(--radius-sm); padding: 12px; transition: all 0.2s; }
+        .item-card { background: var(--cream-lighter); border: 1px solid rgba(44,24,16,0.06); border-radius: var(--radius-sm); padding: 14px; transition: all 0.2s; margin-bottom: 10px; }
         .item-card:hover { border-color: var(--cream); }
         .item-card .form-control { background: #fff !important; }
+        #create-items-container, #edit-items-container { max-height: 320px; overflow-y: auto; padding-right: 4px; }
 
         /* Pagination */
         .pagination { margin: 0 !important; gap: 4px; display: flex; align-items: center; flex-wrap: wrap; }

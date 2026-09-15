@@ -102,7 +102,7 @@
                         <hr style="border-color:rgba(44,24,16,0.08); margin:16px 0;">
                         <label style="font-weight:700; color:var(--coffee-dark); font-size:13px;"><i class="fas fa-list-ul mr-1" style="color:var(--coffee);"></i> Item Pesanan</label>
                         <div id="create-items-container" class="mt-2">
-                            <div class="item-card mb-2">
+                            <div class="item-card">
                                 <div class="row align-items-center">
                                     <div class="col-md-6">
                                         <select name="items[0][product_id]" class="form-control" required>
@@ -192,7 +192,7 @@
     function addNewItem(containerId, prefix, index) {
         var container = document.getElementById(containerId);
         var card = document.createElement('div');
-        card.className = 'item-card mb-2';
+        card.className = 'item-card';
         var options = '<option value="">-- Pilih Produk --</option>';
         products.forEach(function(p) {
             options += '<option value="' + p.id + '">' + p.name + ' - Rp' + new Intl.NumberFormat('id-ID').format(p.price) + '</option>';
