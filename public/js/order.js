@@ -15,6 +15,8 @@
     var pendingOrderId = null;
     var pollingTimer = null;
     var readyPollingTimer = null;
+    var currentView = 'menu';
+    var customerName = '';
     var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
 
     fetch('/api/menu')
@@ -193,13 +195,14 @@
         });
         if (items.length === 0) return;
 
-        var customerName = document.getElementById('customerName').value.trim();
-        if (!customerName) {
+        var customerNameInput = document.getElementById('customerName').value.trim();
+        if (!customerNameInput) {
             alert('Mohon isi nama Anda.');
             openDrawer();
             document.getElementById('customerName').focus();
             return;
         }
+        customerName = customerNameInput;
 
         console.log('[ORDER] Submit order:', { table_id: tableId, customer_name: customerName, items: items });
 
@@ -215,7 +218,7 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken
             },
-            body: JSON.stringify({ table_id: tableId, customer_name: customerName, items: items })
+            body: JSON.stringify({ table_id: tableId, customer_name: customerNameInput, items: items })
         })
         .then(function(r) {
             console.log('[ORDER] Response HTTP status:', r.status);
@@ -379,6 +382,9 @@
     }
 
     function showReadyNotification() {
+        playNotifSound();
+        document.getElementById('readyTitle').textContent = 'Pesanan Siap!';
+        document.getElementById('readyDesc').textContent = 'Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.';
         document.getElementById('readyNotification').classList.add('show');
     }
 
@@ -386,9 +392,108 @@
         document.getElementById('readyNotification').classList.remove('show');
     });
 
+    document.getElementById('readyHistoryBtn').addEventListener('click', function() {
+        document.getElementById('readyNotification').classList.remove('show');
+        switchView('history');
+    });
+
+    document.getElementById('successHistoryBtn').addEventListener('click', function() {
+        document.getElementById('successOverlay').classList.remove('show');
+        switchView('history');
+    });
+
     function showError(message) {
         alert(message || 'Terjadi kesalahan. Silakan coba lagi.');
     }
+
+    function playNotifSound() {
+        try {
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach(function(freq, i) {
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime + i * 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.15 + 0.4);
+                osc.start(audioCtx.currentTime + i * 0.15);
+                osc.stop(audioCtx.currentTime + i * 0.15 + 0.4);
+            });
+        } catch(e) {}
+    }
+
+    function switchView(view) {
+        currentView = view;
+        document.getElementById('menuSection').style.display = view === 'menu' ? 'block' : 'none';
+        document.getElementById('historySection').style.display = view === 'history' ? 'block' : 'none';
+        document.getElementById('tabs').style.display = view === 'menu' ? 'flex' : 'none';
+        document.querySelectorAll('.view-toggle-btn').forEach(function(btn) { btn.classList.remove('active'); });
+        if (view === 'menu') {
+            document.getElementById('menuViewBtn').classList.add('active');
+        } else {
+            document.getElementById('historyViewBtn').classList.add('active');
+            loadHistory();
+        }
+    }
+
+    function loadHistory() {
+        var name = customerName || document.getElementById('customerName').value.trim();
+        var url = '/api/order-history/' + tableId;
+        if (name) url += '?customer_name=' + encodeURIComponent(name);
+
+        var container = document.getElementById('historyList');
+        container.innerHTML = '<div class="loading"><div class="spinner"></div><p style="font-size:13px; color:var(--text-light);">Memuat riwayat...</p></div>';
+
+        fetch(url)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            renderHistory(data);
+        })
+        .catch(function(err) {
+            console.error('[HISTORY] Error:', err);
+            container.innerHTML = '<div class="history-empty"><i class="fas fa-exclamation-triangle"></i><p>Gagal memuat riwayat</p></div>';
+        });
+    }
+
+    function renderHistory(transactions) {
+        var container = document.getElementById('historyList');
+        if (!transactions || transactions.length === 0) {
+            container.innerHTML = '<div class="history-empty"><i class="fas fa-receipt"></i><p>Belum ada riwayat pesanan</p></div>';
+            return;
+        }
+
+        var html = '';
+        transactions.forEach(function(trx) {
+            var statusClass = trx.status;
+            var statusLabel = trx.status.charAt(0).toUpperCase() + trx.status.slice(1);
+            if (trx.status === 'lunas') statusLabel = 'Lunas';
+            if (trx.status === 'selesai') statusLabel = 'Selesai';
+            if (trx.status === 'cancelled') statusLabel = 'Dibatalkan';
+            if (trx.status === 'pending') statusLabel = 'Menunggu';
+
+            var itemsHtml = '';
+            trx.items.forEach(function(item) {
+                itemsHtml += '<div class="history-item"><span class="history-item-name">' + item.name + '</span><span class="history-item-qty">x' + item.quantity + ' &mdash; Rp' + new Intl.NumberFormat('id-ID').format(item.price * item.quantity) + '</span></div>';
+            });
+
+            html += '<div class="history-card">' +
+                '<div class="history-header">' +
+                    '<div><div class="history-order-id">#' + (trx.order_id || trx.id) + '</div><div class="history-date">' + trx.created_at + '</div></div>' +
+                    '<span class="history-status ' + statusClass + '">' + statusLabel + '</span>' +
+                '</div>' +
+                '<div class="history-items">' + itemsHtml + '</div>' +
+                '<div class="history-total"><span>Total</span><span>Rp' + new Intl.NumberFormat('id-ID').format(trx.total_price) + '</span></div>' +
+            '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    document.getElementById('menuViewBtn').addEventListener('click', function() { switchView('menu'); });
+    document.getElementById('historyViewBtn').addEventListener('click', function() { switchView('history'); });
 
     window.resetOrder = function() {
         stopPolling();
@@ -397,6 +502,7 @@
         cart = {};
         updateCart();
         document.getElementById('successOverlay').classList.remove('show');
+        switchView('menu');
         filterMenu();
     };
 

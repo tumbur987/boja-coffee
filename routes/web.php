@@ -61,6 +61,38 @@ Route::get('/api/order-status/{orderId}', function ($orderId) {
     return response()->json(['status' => $transaction->status]);
 });
 
+// API for client order history
+Route::get('/api/order-history/{tableId}', function ($tableId) {
+    $customerName = request('customer_name');
+    $query = Transaction::with(['items.product', 'table'])
+        ->where('table_id', $tableId)
+        ->latest();
+
+    if ($customerName) {
+        $query->where('customer_name', $customerName);
+    }
+
+    $transactions = $query->limit(20)->get()->map(function ($t) {
+        return [
+            'id' => $t->id,
+            'order_id' => $t->order_id,
+            'customer_name' => $t->customer_name,
+            'total_price' => $t->total_price,
+            'status' => $t->status,
+            'created_at' => $t->created_at->format('d M Y, H:i'),
+            'items' => $t->items->map(function ($item) {
+                return [
+                    'name' => $item->product->name ?? '-',
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                ];
+            }),
+        ];
+    });
+
+    return response()->json($transactions);
+});
+
 require __DIR__.'/auth.php';
 
 Route::post('/midtrans/create', [MidtransController::class, 'createTransaction']);

@@ -134,6 +134,31 @@
         .ready-box h2 { font-size: 22px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
         .ready-box p { font-size: 14px; color: var(--text-light); line-height: 1.6; margin-bottom: 24px; }
         .ready-btn { background: var(--coffee); color: white; border: none; padding: 12px 32px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; }
+
+        .view-toggle { display: flex; gap: 8px; padding: 0 16px 12px; }
+        .view-toggle-btn { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid rgba(74,44,42,0.12); background: var(--white); color: var(--text-light); font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .view-toggle-btn.active { background: var(--coffee); color: white; border-color: var(--coffee); box-shadow: 0 4px 12px rgba(74,44,42,0.2); }
+
+        .history-list { padding: 4px 16px; }
+        .history-card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); border: 1px solid rgba(44,24,16,0.04); }
+        .history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .history-order-id { font-size: 12px; color: var(--text-light); font-weight: 600; }
+        .history-date { font-size: 11px; color: var(--text-light); }
+        .history-status { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .history-status.lunas { background: rgba(34,197,94,0.1); color: #16a34a; }
+        .history-status.selesai { background: rgba(59,130,246,0.1); color: #2563eb; }
+        .history-status.pending { background: rgba(245,158,11,0.1); color: #d97706; }
+        .history-status.cancelled { background: rgba(239,68,68,0.1); color: #dc2626; }
+        .history-items { margin-bottom: 10px; }
+        .history-item { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; color: var(--text); }
+        .history-item-name { font-weight: 600; }
+        .history-item-qty { color: var(--text-light); }
+        .history-total { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(44,24,16,0.06); font-weight: 800; color: var(--dark); }
+        .history-empty { text-align: center; padding: 60px 20px; color: var(--text-light); }
+        .history-empty i { font-size: 48px; opacity: 0.2; display: block; margin-bottom: 12px; }
+
+        .history-tab-btn { position: relative; }
+        .history-badge { position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: none; }
     </style>
 </head>
 <body>
@@ -159,15 +184,30 @@
     </div>
 
     <div class="tabs-wrapper">
+        <div class="view-toggle" id="viewToggle">
+            <button class="view-toggle-btn active" id="menuViewBtn"><i class="fas fa-coffee"></i> Menu</button>
+            <button class="view-toggle-btn history-tab-btn" id="historyViewBtn"><i class="fas fa-history"></i> Riwayat Pesanan</button>
+        </div>
         <div class="tabs" id="tabs">
             <div class="tab active" data-cat="all">Semua</div>
         </div>
     </div>
 
-    <div class="menu-list" id="menuList">
-        <div class="loading">
-            <div class="spinner"></div>
-            <p style="font-size:13px; color:var(--text-light);">Memuat menu...</p>
+    <div id="menuSection">
+        <div class="menu-list" id="menuList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="font-size:13px; color:var(--text-light);">Memuat menu...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="historySection" style="display:none;">
+        <div class="history-list" id="historyList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="font-size:13px; color:var(--text-light);">Memuat riwayat...</p>
+            </div>
         </div>
     </div>
 
@@ -225,6 +265,7 @@
             <p id="successDesc">Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.</p>
             <div class="table-code">Meja {{ $table->number }}</div>
             <br>
+            <button class="success-btn" id="successHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
             <button class="success-btn" id="successBtn">Pesan Lagi</button>
         </div>
     </div>
@@ -232,10 +273,11 @@
     <div class="ready-notification" id="readyNotification">
         <div class="ready-box">
             <div class="ready-icon">&#127861;</div>
-            <h2>Pesanan Siap!</h2>
-            <p>Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.</p>
+            <h2 id="readyTitle">Pesanan Siap!</h2>
+            <p id="readyDesc">Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.</p>
             <div class="table-code">Meja {{ $table->number }}</div>
             <br>
+            <button class="ready-btn" id="readyHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
             <button class="ready-btn" id="readyBtn">OK</button>
         </div>
     </div>
