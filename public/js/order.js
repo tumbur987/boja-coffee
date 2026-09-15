@@ -6,7 +6,6 @@
     var clientKey = meta.dataset.clientKey;
 
     console.log('[INIT] Table ID:', tableId, 'Code:', tableCode);
-    console.log('[INIT] Client key:', clientKey);
 
     var cart = {};
     var allProducts = [];
@@ -16,7 +15,7 @@
     var pollingTimer = null;
     var readyPollingTimer = null;
     var currentView = 'menu';
-    var customerName = '';
+    var lastCustomerName = '';
     var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
 
     fetch('/api/menu')
@@ -188,6 +187,14 @@
         renderMenu(activeCategory === 'all' ? allProducts : allProducts.filter(function(p) { return p.category_id == activeCategory; }));
     };
 
+    function getCustomerName() {
+        var nameInput = document.getElementById('customerName');
+        if (nameInput && nameInput.value.trim()) {
+            lastCustomerName = nameInput.value.trim();
+        }
+        return lastCustomerName;
+    }
+
     window.submitOrder = function() {
         var items = [];
         Object.keys(cart).forEach(function(pid) {
@@ -195,16 +202,17 @@
         });
         if (items.length === 0) return;
 
-        var customerNameInput = document.getElementById('customerName').value.trim();
-        if (!customerNameInput) {
+        var nameInput = document.getElementById('customerName');
+        var cname = nameInput ? nameInput.value.trim() : '';
+        if (!cname) {
             alert('Mohon isi nama Anda.');
             openDrawer();
-            document.getElementById('customerName').focus();
+            nameInput.focus();
             return;
         }
-        customerName = customerNameInput;
+        lastCustomerName = cname;
 
-        console.log('[ORDER] Submit order:', { table_id: tableId, customer_name: customerName, items: items });
+        console.log('[ORDER] Submit order:', { table_id: tableId, customer_name: cname, items: items });
 
         btns = [document.getElementById('cartBtn'), document.getElementById('drawerCheckoutBtn')];
         btns.forEach(function(btn) {
@@ -218,7 +226,7 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken
             },
-            body: JSON.stringify({ table_id: tableId, customer_name: customerNameInput, items: items })
+            body: JSON.stringify({ table_id: tableId, customer_name: cname, items: items })
         })
         .then(function(r) {
             console.log('[ORDER] Response HTTP status:', r.status);
@@ -313,7 +321,6 @@
         var attempt = 0;
         pollingTimer = setInterval(function() {
             attempt++;
-            console.log('[POLLING] Attempt #' + attempt + ' untuk order_id:', pendingOrderId);
             fetch('/midtrans/payment-status', {
                 method: 'POST',
                 headers: {
@@ -326,10 +333,8 @@
             .then(function(data) {
                 console.log('[POLLING] Response:', data);
                 if (data && data.success) {
-                    console.log('[POLLING] Pembayaran ditemukan! Status:', data.status);
                     updateStatus('lunas');
                 } else if (attempt >= 10) {
-                    console.log('[POLLING] Max attempts, status tetap pending');
                     updateStatus('pending');
                 }
             })
@@ -352,9 +357,7 @@
     function startReadyPolling() {
         if (!pendingOrderId) return;
         console.log('[READY-POLLING] Mulai cek status pesanan:', pendingOrderId);
-        var attempt = 0;
         readyPollingTimer = setInterval(function() {
-            attempt++;
             fetch('/api/order-status/' + pendingOrderId)
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -381,31 +384,6 @@
         }
     }
 
-    function showReadyNotification() {
-        playNotifSound();
-        document.getElementById('readyTitle').textContent = 'Pesanan Siap!';
-        document.getElementById('readyDesc').textContent = 'Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.';
-        document.getElementById('readyNotification').classList.add('show');
-    }
-
-    document.getElementById('readyBtn').addEventListener('click', function() {
-        document.getElementById('readyNotification').classList.remove('show');
-    });
-
-    document.getElementById('readyHistoryBtn').addEventListener('click', function() {
-        document.getElementById('readyNotification').classList.remove('show');
-        switchView('history');
-    });
-
-    document.getElementById('successHistoryBtn').addEventListener('click', function() {
-        document.getElementById('successOverlay').classList.remove('show');
-        switchView('history');
-    });
-
-    function showError(message) {
-        alert(message || 'Terjadi kesalahan. Silakan coba lagi.');
-    }
-
     function playNotifSound() {
         try {
             var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -425,6 +403,17 @@
         } catch(e) {}
     }
 
+    function showReadyNotification() {
+        playNotifSound();
+        document.getElementById('readyTitle').textContent = 'Pesanan Siap!';
+        document.getElementById('readyDesc').textContent = 'Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.';
+        document.getElementById('readyNotification').classList.add('show');
+    }
+
+    function showError(message) {
+        alert(message || 'Terjadi kesalahan. Silakan coba lagi.');
+    }
+
     function switchView(view) {
         currentView = view;
         document.getElementById('menuSection').style.display = view === 'menu' ? 'block' : 'none';
@@ -440,16 +429,19 @@
     }
 
     function loadHistory() {
-        var name = customerName || document.getElementById('customerName').value.trim();
+        var name = getCustomerName();
         var url = '/api/order-history/' + tableId;
         if (name) url += '?customer_name=' + encodeURIComponent(name);
 
         var container = document.getElementById('historyList');
         container.innerHTML = '<div class="loading"><div class="spinner"></div><p style="font-size:13px; color:var(--text-light);">Memuat riwayat...</p></div>';
 
+        console.log('[HISTORY] Fetch:', url);
+
         fetch(url)
         .then(function(r) { return r.json(); })
         .then(function(data) {
+            console.log('[HISTORY] Data:', data);
             renderHistory(data);
         })
         .catch(function(err) {
@@ -467,22 +459,28 @@
 
         var html = '';
         transactions.forEach(function(trx) {
-            var statusClass = trx.status;
-            var statusLabel = trx.status.charAt(0).toUpperCase() + trx.status.slice(1);
-            if (trx.status === 'lunas') statusLabel = 'Lunas';
-            if (trx.status === 'selesai') statusLabel = 'Selesai';
-            if (trx.status === 'cancelled') statusLabel = 'Dibatalkan';
-            if (trx.status === 'pending') statusLabel = 'Menunggu';
+            var statusLabel = '';
+            var statusIcon = '';
+            if (trx.status === 'lunas') { statusLabel = 'Lunas'; statusIcon = '&#9989;'; }
+            else if (trx.status === 'selesai') { statusLabel = 'Selesai'; statusIcon = '&#9989;'; }
+            else if (trx.status === 'cancelled') { statusLabel = 'Dibatalkan'; statusIcon = '&#10060;'; }
+            else { statusLabel = 'Menunggu'; statusIcon = '&#9203;'; }
 
             var itemsHtml = '';
             trx.items.forEach(function(item) {
-                itemsHtml += '<div class="history-item"><span class="history-item-name">' + item.name + '</span><span class="history-item-qty">x' + item.quantity + ' &mdash; Rp' + new Intl.NumberFormat('id-ID').format(item.price * item.quantity) + '</span></div>';
+                itemsHtml += '<div class="history-item">' +
+                    '<span class="history-item-name">' + item.name + '</span>' +
+                    '<span class="history-item-qty">' + item.quantity + ' x Rp' + new Intl.NumberFormat('id-ID').format(item.price) + '</span>' +
+                '</div>';
             });
 
             html += '<div class="history-card">' +
                 '<div class="history-header">' +
-                    '<div><div class="history-order-id">#' + (trx.order_id || trx.id) + '</div><div class="history-date">' + trx.created_at + '</div></div>' +
-                    '<span class="history-status ' + statusClass + '">' + statusLabel + '</span>' +
+                    '<div>' +
+                        '<div class="history-order-id">Pesanan #' + (trx.id) + '</div>' +
+                        '<div class="history-date">' + trx.created_at + '</div>' +
+                    '</div>' +
+                    '<span class="history-status ' + trx.status + '">' + statusIcon + ' ' + statusLabel + '</span>' +
                 '</div>' +
                 '<div class="history-items">' + itemsHtml + '</div>' +
                 '<div class="history-total"><span>Total</span><span>Rp' + new Intl.NumberFormat('id-ID').format(trx.total_price) + '</span></div>' +
@@ -495,16 +493,25 @@
     document.getElementById('menuViewBtn').addEventListener('click', function() { switchView('menu'); });
     document.getElementById('historyViewBtn').addEventListener('click', function() { switchView('history'); });
 
-    window.resetOrder = function() {
-        stopPolling();
-        stopReadyPolling();
-        pendingOrderId = null;
-        cart = {};
-        updateCart();
+    document.getElementById('readyBtn').addEventListener('click', function() {
+        document.getElementById('readyNotification').classList.remove('show');
+    });
+
+    document.getElementById('readyHistoryBtn').addEventListener('click', function() {
+        document.getElementById('readyNotification').classList.remove('show');
+        switchView('history');
+    });
+
+    document.getElementById('successHistoryBtn').addEventListener('click', function() {
+        document.getElementById('successOverlay').classList.remove('show');
+        switchView('history');
+    });
+
+    document.getElementById('successBtn').addEventListener('click', function() {
         document.getElementById('successOverlay').classList.remove('show');
         switchView('menu');
         filterMenu();
-    };
+    });
 
     document.getElementById('cartViewBtn').addEventListener('click', openDrawer);
     document.getElementById('cartBtn').addEventListener('click', openDrawer);
@@ -515,5 +522,4 @@
         closeDrawer();
         submitOrder();
     });
-    document.getElementById('successBtn').addEventListener('click', resetOrder);
 })();
