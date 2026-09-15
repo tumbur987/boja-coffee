@@ -15,7 +15,7 @@
                         <th>No Meja</th>
                         <th>Kode</th>
                         <th>QR Code</th>
-                        <th style="width:160px;">Aksi</th>
+                        <th style="width:140px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,9 +54,9 @@
                 </tbody>
             </table>
             @if($tables->hasPages())
-            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
-                <small style="color:var(--text-muted);">Menampilkan {{ $tables->firstItem() }}-{{ $tables->lastItem() }} dari {{ $tables->total() }} data</small>
-                {{ $tables->links() }}
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2 pagination-wrap">
+                <small class="text-muted" style="font-size:13px;">Menampilkan {{ $tables->firstItem() }}-{{ $tables->lastItem() }} dari {{ $tables->total() }} data</small>
+                {{ $tables->links('pagination::bootstrap-4') }}
             </div>
             @endif
         </div>
@@ -74,7 +74,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group mb-0">
-                            <label>Nomor Meja</label>
+                            <label><i class="fas fa-chair mr-1"></i>Nomor Meja</label>
                             <input type="text" class="form-control" name="number" placeholder="Contoh: 1" required>
                             <small class="text-muted">Kode akan digenerate otomatis (MJA001, MJA002, dst).</small>
                         </div>
@@ -101,7 +101,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group mb-0">
-                            <label>Nomor Meja</label>
+                            <label><i class="fas fa-chair mr-1"></i>Nomor Meja</label>
                             <input type="text" class="form-control" id="edit-number" name="number" required>
                         </div>
                     </div>

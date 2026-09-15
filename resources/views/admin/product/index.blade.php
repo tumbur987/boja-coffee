@@ -17,7 +17,7 @@
                         <th>Stok</th>
                         <th>Harga</th>
                         <th>Gambar</th>
-                        <th style="width:140px;">Aksi</th>
+                        <th style="width:120px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,7 +27,7 @@
                         <td style="font-weight:600;">{{ $product->name }}</td>
                         <td><span class="badge badge-primary">{{ $product->category->name }}</span></td>
                         <td>{{ $product->stock }}</td>
-                        <td style="font-weight:700; color:var(--coffee);">Rp.{{ number_format($product->price, 0, ',', '.') }}</td>
+                        <td style="font-weight:700; color:var(--coffee);">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
                         <td>
                             @if ($product->image)
                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" width="40" height="40" style="border-radius:8px; object-fit:cover;">
@@ -63,9 +63,9 @@
                 </tbody>
             </table>
             @if($products->hasPages())
-            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
-                <small style="color:var(--text-muted);">Menampilkan {{ $products->firstItem() }}-{{ $products->lastItem() }} dari {{ $products->total() }} data</small>
-                {{ $products->links() }}
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2 pagination-wrap">
+                <small class="text-muted" style="font-size:13px;">Menampilkan {{ $products->firstItem() }}-{{ $products->lastItem() }} dari {{ $products->total() }} data</small>
+                {{ $products->links('pagination::bootstrap-4') }}
             </div>
             @endif
         </div>
@@ -85,7 +85,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Kategori</label>
+                                    <label><i class="fas fa-folder mr-1"></i>Kategori</label>
                                     <select class="form-control" name="category_id" required>
                                         <option value="">-- Pilih Kategori --</option>
                                         @foreach ($categories as $category)
@@ -96,7 +96,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Nama Menu</label>
+                                    <label><i class="fas fa-coffee mr-1"></i>Nama Menu</label>
                                     <input type="text" class="form-control" name="name" placeholder="Contoh: Gula Aren" required>
                                 </div>
                             </div>
@@ -104,19 +104,19 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Stok</label>
+                                    <label><i class="fas fa-box mr-1"></i>Stok</label>
                                     <input type="number" class="form-control" name="stock" min="0" value="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Harga (Rp)</label>
+                                    <label><i class="fas fa-money-bill mr-1"></i>Harga (Rp)</label>
                                     <input type="number" class="form-control" name="price" min="0" placeholder="23000" required>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group mb-0">
-                            <label>Gambar</label>
+                            <label><i class="fas fa-image mr-1"></i>Gambar</label>
                             <input type="file" class="form-control" name="image" accept="image/*">
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Kategori</label>
+                                    <label><i class="fas fa-folder mr-1"></i>Kategori</label>
                                     <select class="form-control" id="edit-category_id" name="category_id" required>
                                         <option value="">-- Pilih Kategori --</option>
                                         @foreach ($categories as $category)
@@ -155,7 +155,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Nama Menu</label>
+                                    <label><i class="fas fa-coffee mr-1"></i>Nama Menu</label>
                                     <input type="text" class="form-control" id="edit-name" name="name" required>
                                 </div>
                             </div>
@@ -163,19 +163,19 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Stok</label>
+                                    <label><i class="fas fa-box mr-1"></i>Stok</label>
                                     <input type="number" class="form-control" id="edit-stock" name="stock" min="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Harga (Rp)</label>
+                                    <label><i class="fas fa-money-bill mr-1"></i>Harga (Rp)</label>
                                     <input type="number" class="form-control" id="edit-price" name="price" min="0" required>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group mb-0">
-                            <label>Gambar <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
+                            <label><i class="fas fa-image mr-1"></i>Gambar <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
                             <input type="file" class="form-control" name="image" accept="image/*">
                             <div id="edit-image-preview" class="mt-2" style="display:none;">
                                 <img id="edit-image-img" src="" alt="" width="80" height="80" style="border-radius:8px; object-fit:cover;">

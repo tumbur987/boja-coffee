@@ -71,9 +71,9 @@
                 </tbody>
             </table>
             @if($transactions->hasPages())
-            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
-                <small style="color:var(--text-muted);">Menampilkan {{ $transactions->firstItem() }}-{{ $transactions->lastItem() }} dari {{ $transactions->total() }} data</small>
-                {{ $transactions->links() }}
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2 pagination-wrap">
+                <small class="text-muted" style="font-size:13px;">Menampilkan {{ $transactions->firstItem() }}-{{ $transactions->lastItem() }} dari {{ $transactions->total() }} data</small>
+                {{ $transactions->links('pagination::bootstrap-4') }}
             </div>
             @endif
         </div>
@@ -90,8 +90,8 @@
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>Meja</label>
+                        <div class="form-group mb-0">
+                            <label><i class="fas fa-chair mr-1"></i>Meja</label>
                             <select class="form-control" name="table_id" required>
                                 <option value="">-- Pilih Meja --</option>
                                 @foreach ($tables as $table)
@@ -99,27 +99,29 @@
                                 @endforeach
                             </select>
                         </div>
-                        <hr style="border-color:rgba(44,24,16,0.06);">
-                        <h6 style="font-weight:700; margin-bottom:12px;"><i class="fas fa-list-ul mr-1" style="color:var(--coffee);"></i> Item Pesanan</h6>
-                        <div id="create-items-container">
-                            <div class="row mb-2 item-row">
-                                <div class="col-md-5">
-                                    <select name="items[0][product_id]" class="form-control" required>
-                                        <option value="">-- Pilih Produk --</option>
-                                        @foreach ($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->name }} - Rp.{{ number_format($product->price) }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="number" name="items[0][quantity]" class="form-control" placeholder="Jumlah" min="1" max="50" value="1" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <button type="button" class="btn btn-danger btn-sm btn-remove-item"><i class="fas fa-times"></i></button>
+                        <hr style="border-color:rgba(44,24,16,0.08); margin:16px 0;">
+                        <label style="font-weight:700; color:var(--coffee-dark); font-size:13px;"><i class="fas fa-list-ul mr-1" style="color:var(--coffee);"></i> Item Pesanan</label>
+                        <div id="create-items-container" class="mt-2">
+                            <div class="item-card mb-2">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <select name="items[0][product_id]" class="form-control" required>
+                                            <option value="">-- Pilih Produk --</option>
+                                            @foreach ($products as $product)
+                                                <option value="{{ $product->id }}">{{ $product->name }} - Rp{{ number_format($product->price) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="items[0][quantity]" class="form-control" placeholder="Jumlah" min="1" max="50" value="1" required>
+                                    </div>
+                                    <div class="col-md-3 d-flex justify-content-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-item"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-success btn-sm" id="create-add-item"><i class="fas fa-plus mr-1"></i> Tambah Item</button>
+                        <button type="button" class="btn btn-outline-success btn-sm mt-2" id="create-add-item"><i class="fas fa-plus mr-1"></i> Tambah Item</button>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -142,28 +144,34 @@
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>Meja</label>
-                            <select class="form-control" id="edit-table_id" name="table_id" required>
-                                <option value="">-- Pilih Meja --</option>
-                                @foreach ($tables as $table)
-                                    <option value="{{ $table->id }}">Meja {{ $table->number }} ({{ $table->code }})</option>
-                                @endforeach
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label><i class="fas fa-chair mr-1"></i>Meja</label>
+                                    <select class="form-control" id="edit-table_id" name="table_id" required>
+                                        <option value="">-- Pilih Meja --</option>
+                                        @foreach ($tables as $table)
+                                            <option value="{{ $table->id }}">Meja {{ $table->number }} ({{ $table->code }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label><i class="fas fa-flag mr-1"></i>Status</label>
+                                    <select class="form-control" id="edit-status" name="status" required>
+                                        <option value="pending">Pending</option>
+                                        <option value="lunas">Lunas</option>
+                                        <option value="selesai">Selesai</option>
+                                        <option value="cancelled">Dibatalkan</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select class="form-control" id="edit-status" name="status" required>
-                                <option value="pending">Pending</option>
-                                <option value="lunas">Lunas</option>
-                                <option value="selesai">Selesai</option>
-                                <option value="cancelled">Dibatalkan</option>
-                            </select>
-                        </div>
-                        <hr style="border-color:rgba(44,24,16,0.06);">
-                        <h6 style="font-weight:700; margin-bottom:12px;"><i class="fas fa-list-ul mr-1" style="color:var(--coffee);"></i> Item Pesanan</h6>
-                        <div id="edit-items-container"></div>
-                        <button type="button" class="btn btn-success btn-sm" id="edit-add-item"><i class="fas fa-plus mr-1"></i> Tambah Item</button>
+                        <hr style="border-color:rgba(44,24,16,0.08); margin:16px 0;">
+                        <label style="font-weight:700; color:var(--coffee-dark); font-size:13px;"><i class="fas fa-list-ul mr-1" style="color:var(--coffee);"></i> Item Pesanan</label>
+                        <div id="edit-items-container" class="mt-2"></div>
+                        <button type="button" class="btn btn-outline-success btn-sm mt-2" id="edit-add-item"><i class="fas fa-plus mr-1"></i> Tambah Item</button>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -183,17 +191,19 @@
 
     function addNewItem(containerId, prefix, index) {
         var container = document.getElementById(containerId);
-        var row = document.createElement('div');
-        row.className = 'row mb-2 item-row';
+        var card = document.createElement('div');
+        card.className = 'item-card mb-2';
         var options = '<option value="">-- Pilih Produk --</option>';
         products.forEach(function(p) {
-            options += '<option value="' + p.id + '">' + p.name + ' - Rp.' + new Intl.NumberFormat('id-ID').format(p.price) + '</option>';
+            options += '<option value="' + p.id + '">' + p.name + ' - Rp' + new Intl.NumberFormat('id-ID').format(p.price) + '</option>';
         });
-        row.innerHTML =
-            '<div class="col-md-5"><select name="' + prefix + '[' + index + '][product_id]" class="form-control" required>' + options + '</select></div>' +
-            '<div class="col-md-4"><input type="number" name="' + prefix + '[' + index + '][quantity]" class="form-control" placeholder="Jumlah" min="1" max="50" value="1" required></div>' +
-            '<div class="col-md-3"><button type="button" class="btn btn-danger btn-sm btn-remove-item"><i class="fas fa-times"></i></button></div>';
-        container.appendChild(row);
+        card.innerHTML =
+            '<div class="row align-items-center">' +
+                '<div class="col-md-6"><select name="' + prefix + '[' + index + '][product_id]" class="form-control" required>' + options + '</select></div>' +
+                '<div class="col-md-3"><input type="number" name="' + prefix + '[' + index + '][quantity]" class="form-control" placeholder="Jumlah" min="1" max="50" value="1" required></div>' +
+                '<div class="col-md-3 d-flex justify-content-end"><button type="button" class="btn btn-outline-danger btn-sm btn-remove-item"><i class="fas fa-trash-alt"></i></button></div>' +
+            '</div>';
+        container.appendChild(card);
     }
 
     document.getElementById('create-add-item').addEventListener('click', function() { addNewItem('create-items-container', 'items', createItemIndex++); });
@@ -202,7 +212,7 @@
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('btn-remove-item') || e.target.closest('.btn-remove-item')) {
             var btn = e.target.closest('.btn-remove-item');
-            btn.closest('.item-row').remove();
+            btn.closest('.item-card').remove();
         }
     });
 

@@ -13,7 +13,7 @@
                     <tr>
                         <th style="width:50px;">No</th>
                         <th>Nama Kategori</th>
-                        <th style="width:160px;">Aksi</th>
+                        <th style="width:140px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,9 +43,9 @@
                 </tbody>
             </table>
             @if($categories->hasPages())
-            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
-                <small style="color:var(--text-muted);">Menampilkan {{ $categories->firstItem() }}-{{ $categories->lastItem() }} dari {{ $categories->total() }} data</small>
-                {{ $categories->links() }}
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2 pagination-wrap">
+                <small class="text-muted" style="font-size:13px;">Menampilkan {{ $categories->firstItem() }}-{{ $categories->lastItem() }} dari {{ $categories->total() }} data</small>
+                {{ $categories->links('pagination::bootstrap-4') }}
             </div>
             @endif
         </div>
@@ -62,9 +62,9 @@
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="create-name">Nama Kategori</label>
-                            <input type="text" class="form-control" id="create-name" name="name" placeholder="Contoh: Coffee Based" required>
+                        <div class="form-group mb-0">
+                            <label><i class="fas fa-tag mr-1"></i>Nama Kategori</label>
+                            <input type="text" class="form-control" name="name" placeholder="Contoh: Coffee Based" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -88,8 +88,8 @@
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="edit-name">Nama Kategori</label>
+                        <div class="form-group mb-0">
+                            <label><i class="fas fa-tag mr-1"></i>Nama Kategori</label>
                             <input type="text" class="form-control" id="edit-name" name="name" required>
                         </div>
                     </div>
