@@ -46,6 +46,10 @@
         .tab { padding: 8px 18px; border-radius: 50px; border: 2px solid rgba(74,44,42,0.12); background: var(--white); color: var(--text-light); font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
         .tab.active { background: var(--coffee); color: white; border-color: var(--coffee); box-shadow: 0 4px 12px rgba(74,44,42,0.2); }
 
+        .view-toggle { display: flex; gap: 8px; padding: 0 16px 12px; }
+        .view-toggle-btn { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid rgba(74,44,42,0.12); background: var(--white); color: var(--text-light); font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; z-index: 51; }
+        .view-toggle-btn.active { background: var(--coffee); color: white; border-color: var(--coffee); box-shadow: 0 4px 12px rgba(74,44,42,0.2); }
+
         .menu-list { padding: 4px 16px; }
         .menu-card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid rgba(44,24,16,0.04); transition: all 0.2s; }
         .menu-card:hover { box-shadow: var(--shadow-lg); }
@@ -156,9 +160,6 @@
         .history-total { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(44,24,16,0.06); font-weight: 800; color: var(--dark); }
         .history-empty { text-align: center; padding: 60px 20px; color: var(--text-light); }
         .history-empty i { font-size: 48px; opacity: 0.2; display: block; margin-bottom: 12px; }
-
-        .history-tab-btn { position: relative; }
-        .history-badge { position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: none; }
     </style>
 </head>
 <body>
@@ -185,8 +186,8 @@
 
     <div class="tabs-wrapper">
         <div class="view-toggle" id="viewToggle">
-            <button class="view-toggle-btn active" id="menuViewBtn"><i class="fas fa-coffee"></i> Menu</button>
-            <button class="view-toggle-btn history-tab-btn" id="historyViewBtn"><i class="fas fa-history"></i> Riwayat Pesanan</button>
+            <button type="button" class="view-toggle-btn active" id="menuViewBtn" onclick="switchView('menu')"><i class="fas fa-coffee"></i> Menu</button>
+            <button type="button" class="view-toggle-btn" id="historyViewBtn" onclick="switchView('history')"><i class="fas fa-history"></i> Riwayat Pesanan</button>
         </div>
         <div class="tabs" id="tabs">
             <div class="tab active" data-cat="all">Semua</div>
@@ -265,8 +266,8 @@
             <p id="successDesc">Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.</p>
             <div class="table-code">Meja {{ $table->number }}</div>
             <br>
-            <button class="success-btn" id="successHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
-            <button class="success-btn" id="successBtn">Pesan Lagi</button>
+            <button class="success-btn" id="successHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;" onclick="document.getElementById('successOverlay').classList.remove('show'); switchView('history');"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
+            <button class="success-btn" id="successBtn" onclick="document.getElementById('successOverlay').classList.remove('show'); switchView('menu');"><i class="fas fa-shopping-bag"></i> Pesan Lagi</button>
         </div>
     </div>
 
@@ -277,13 +278,11 @@
             <p id="readyDesc">Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.</p>
             <div class="table-code">Meja {{ $table->number }}</div>
             <br>
-            <button class="ready-btn" id="readyHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
-            <button class="ready-btn" id="readyBtn">OK</button>
+            <button class="ready-btn" id="readyHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;" onclick="document.getElementById('readyNotification').classList.remove('show'); switchView('history');"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
+            <button class="ready-btn" id="readyBtn" onclick="document.getElementById('readyNotification').classList.remove('show');">OK</button>
         </div>
     </div>
 
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js"
-            data-client-key="{{ config('midtrans.client_key') }}"></script>
     <div id="order-data"
          data-table-id="{{ $table->id }}"
          data-table-code="{{ $table->code }}"
@@ -291,5 +290,7 @@
          data-client-key="{{ config('midtrans.client_key') }}"
          style="display:none;"></div>
     <script src="{{ asset('js/order.js') }}"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+            data-client-key="{{ config('midtrans.client_key') }}" async></script>
 </body>
 </html>
