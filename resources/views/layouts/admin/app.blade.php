@@ -94,6 +94,9 @@
         select.form-control { appearance: auto !important; }
 
         /* Modals */
+        .modal { z-index: 1050 !important; }
+        .modal-open .wrapper { overflow: visible !important; }
+        .modal-open .content-wrapper { overflow: visible !important; }
         .modal-content { border: none !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important; }
         .modal-header { border-bottom: 1px solid rgba(44,24,16,0.06) !important; padding: 18px 24px !important; }
         .modal-header .modal-title { font-weight: 700 !important; color: var(--coffee-dark) !important; font-size: 17px !important; }
@@ -134,7 +137,7 @@
 
         /* Animation */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .content .card { animation: fadeInUp 0.3s ease-out; }
+        .content > .container-fluid > .card { animation: fadeInUp 0.3s ease-out; }
 
         /* Item card (transaction modal) */
         .item-card { background: var(--cream-lighter); border: 1px solid rgba(44,24,16,0.06); border-radius: var(--radius-sm); padding: 14px; transition: all 0.2s; margin-bottom: 10px; }
