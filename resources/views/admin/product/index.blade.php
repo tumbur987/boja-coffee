@@ -23,7 +23,7 @@
                 <tbody>
                     @forelse ($products as $product)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ ($products->currentPage() - 1) * $products->perPage() + $loop->iteration }}</td>
                         <td style="font-weight:600;">{{ $product->name }}</td>
                         <td><span class="badge badge-primary">{{ $product->category->name }}</span></td>
                         <td>{{ $product->stock }}</td>
@@ -62,6 +62,12 @@
                     @endforelse
                 </tbody>
             </table>
+            @if($products->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                <small style="color:var(--text-muted);">Menampilkan {{ $products->firstItem() }}-{{ $products->lastItem() }} dari {{ $products->total() }} data</small>
+                {{ $products->links() }}
+            </div>
+            @endif
         </div>
     </div>
 

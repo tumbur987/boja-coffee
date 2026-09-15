@@ -131,6 +131,13 @@
         /* Animation */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .content .card { animation: fadeInUp 0.3s ease-out; }
+
+        /* Pagination */
+        .pagination { margin: 0 !important; gap: 4px; }
+        .page-item .page-link { border: none !important; border-radius: var(--radius-xs) !important; color: var(--coffee) !important; font-weight: 600 !important; font-size: 13px !important; padding: 8px 14px !important; transition: all 0.2s !important; }
+        .page-item .page-link:hover { background: var(--cream-lighter) !important; color: var(--coffee-dark) !important; }
+        .page-item.active .page-link { background: var(--coffee) !important; color: #fff !important; box-shadow: 0 2px 8px rgba(74,44,42,0.25) !important; }
+        .page-item.disabled .page-link { color: var(--text-muted) !important; opacity: 0.5; }
     </style>
     @yield('styles')
 </head>

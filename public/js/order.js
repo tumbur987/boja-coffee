@@ -14,6 +14,7 @@
     var btns = [];
     var pendingOrderId = null;
     var pollingTimer = null;
+    var readyPollingTimer = null;
     var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
 
     fetch('/api/menu')
@@ -78,9 +79,19 @@
         });
     }
 
+    var MAX_QTY = 50;
+
     window.changeQty = function(productId, delta) {
-        cart[productId] = (cart[productId] || 0) + delta;
-        if (cart[productId] <= 0) delete cart[productId];
+        var newQty = (cart[productId] || 0) + delta;
+        if (newQty > MAX_QTY) {
+            newQty = MAX_QTY;
+            alert('Maksimal pemesanan adalah 50 item per produk.');
+        }
+        if (newQty <= 0) {
+            delete cart[productId];
+        } else {
+            cart[productId] = newQty;
+        }
         var el = document.getElementById('qty-' + productId);
         if (el) el.textContent = cart[productId] || 0;
         updateCart();
@@ -279,6 +290,7 @@
             document.getElementById('successIcon').innerHTML = '&#10003;';
             document.getElementById('successOverlay').classList.add('show');
             stopPolling();
+            startReadyPolling();
         } else if (status === 'pending') {
             document.getElementById('successTitle').textContent = 'Menunggu Pembayaran';
             document.getElementById('successDesc').textContent = 'Pesanan Anda diterima. Selesaikan pembayaran melalui metode yang Anda pilih agar pesanan diproses.';
@@ -334,12 +346,53 @@
         }
     }
 
+    function startReadyPolling() {
+        if (!pendingOrderId) return;
+        console.log('[READY-POLLING] Mulai cek status pesanan:', pendingOrderId);
+        var attempt = 0;
+        readyPollingTimer = setInterval(function() {
+            attempt++;
+            fetch('/api/order-status/' + pendingOrderId)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                console.log('[READY-POLLING] Status:', data.status);
+                if (data.status === 'selesai') {
+                    clearInterval(readyPollingTimer);
+                    readyPollingTimer = null;
+                    showReadyNotification();
+                } else if (data.status === 'cancelled') {
+                    clearInterval(readyPollingTimer);
+                    readyPollingTimer = null;
+                }
+            })
+            .catch(function(err) {
+                console.error('[READY-POLLING] Error:', err);
+            });
+        }, 5000);
+    }
+
+    function stopReadyPolling() {
+        if (readyPollingTimer) {
+            clearInterval(readyPollingTimer);
+            readyPollingTimer = null;
+        }
+    }
+
+    function showReadyNotification() {
+        document.getElementById('readyNotification').classList.add('show');
+    }
+
+    document.getElementById('readyBtn').addEventListener('click', function() {
+        document.getElementById('readyNotification').classList.remove('show');
+    });
+
     function showError(message) {
         alert(message || 'Terjadi kesalahan. Silakan coba lagi.');
     }
 
     window.resetOrder = function() {
         stopPolling();
+        stopReadyPolling();
         pendingOrderId = null;
         cart = {};
         updateCart();

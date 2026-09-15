@@ -21,7 +21,7 @@
                 <tbody>
                     @forelse ($tables as $table)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ ($tables->currentPage() - 1) * $tables->perPage() + $loop->iteration }}</td>
                         <td style="font-weight:600;">Meja {{ $table->number }}</td>
                         <td><code style="background:var(--cream-lighter); padding:4px 10px; border-radius:4px; font-size:12px; font-weight:600;">{{ $table->code }}</code></td>
                         <td>
@@ -53,6 +53,12 @@
                     @endforelse
                 </tbody>
             </table>
+            @if($tables->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                <small style="color:var(--text-muted);">Menampilkan {{ $tables->firstItem() }}-{{ $tables->lastItem() }} dari {{ $tables->total() }} data</small>
+                {{ $tables->links() }}
+            </div>
+            @endif
         </div>
     </div>
 

@@ -23,7 +23,7 @@
                 <tbody>
                     @forelse ($transactions as $transaction)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ ($transactions->currentPage() - 1) * $transactions->perPage() + $loop->iteration }}</td>
                         <td><span class="badge badge-primary">Meja {{ $transaction->table->number }}</span></td>
                         <td style="font-weight:600;">{{ $transaction->customer_name ?? '-' }}</td>
                         <td>
@@ -49,7 +49,7 @@
                             @if ($transaction->status == 'lunas')
                                 <form action="{{ route('transaction.selesai', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn btn-info btn-sm" title="Tandai Selesai"><i class="fas fa-check"></i></button>
+                                    <button type="submit" class="btn btn-info btn-sm btn-selesai" title="Tandai Selesai"><i class="fas fa-check"></i></button>
                                 </form>
                             @endif
                             <button class="btn btn-warning btn-sm btn-edit" data-id="{{ $transaction->id }}"><i class="fas fa-edit"></i></button>
@@ -70,6 +70,12 @@
                     @endforelse
                 </tbody>
             </table>
+            @if($transactions->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                <small style="color:var(--text-muted);">Menampilkan {{ $transactions->firstItem() }}-{{ $transactions->lastItem() }} dari {{ $transactions->total() }} data</small>
+                {{ $transactions->links() }}
+            </div>
+            @endif
         </div>
     </div>
 
@@ -106,7 +112,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <input type="number" name="items[0][quantity]" class="form-control" placeholder="Jumlah" min="1" value="1" required>
+                                    <input type="number" name="items[0][quantity]" class="form-control" placeholder="Jumlah" min="1" max="50" value="1" required>
                                 </div>
                                 <div class="col-md-3">
                                     <button type="button" class="btn btn-danger btn-sm btn-remove-item"><i class="fas fa-times"></i></button>
@@ -185,7 +191,7 @@
         });
         row.innerHTML =
             '<div class="col-md-5"><select name="' + prefix + '[' + index + '][product_id]" class="form-control" required>' + options + '</select></div>' +
-            '<div class="col-md-4"><input type="number" name="' + prefix + '[' + index + '][quantity]" class="form-control" placeholder="Jumlah" min="1" value="1" required></div>' +
+            '<div class="col-md-4"><input type="number" name="' + prefix + '[' + index + '][quantity]" class="form-control" placeholder="Jumlah" min="1" max="50" value="1" required></div>' +
             '<div class="col-md-3"><button type="button" class="btn btn-danger btn-sm btn-remove-item"><i class="fas fa-times"></i></button></div>';
         container.appendChild(row);
     }
@@ -227,6 +233,24 @@
         btn.addEventListener('click', function() {
             var form = this.closest('form');
             confirmDelete(function() { form.submit(); });
+        });
+    });
+
+    document.querySelectorAll('.btn-selesai').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var form = this.closest('form');
+            Swal.fire({
+                title: 'Tandai Selesai?',
+                text: 'Pesanan akan ditandai sebagai selesai dan pelanggan akan mendapat notifikasi.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#22c55e',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Selesai!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then(function(r) { if (r.isConfirmed) form.submit(); });
         });
     });
 </script>

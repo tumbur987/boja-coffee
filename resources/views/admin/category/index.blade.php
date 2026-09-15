@@ -19,7 +19,7 @@
                 <tbody>
                     @forelse ($categories as $category)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ ($categories->currentPage() - 1) * $categories->perPage() + $loop->iteration }}</td>
                         <td style="font-weight:600;">{{ $category->name }}</td>
                         <td>
                             <button class="btn btn-warning btn-sm btn-edit" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
@@ -42,6 +42,12 @@
                     @endforelse
                 </tbody>
             </table>
+            @if($categories->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                <small style="color:var(--text-muted);">Menampilkan {{ $categories->firstItem() }}-{{ $categories->lastItem() }} dari {{ $categories->total() }} data</small>
+                {{ $categories->links() }}
+            </div>
+            @endif
         </div>
     </div>
 

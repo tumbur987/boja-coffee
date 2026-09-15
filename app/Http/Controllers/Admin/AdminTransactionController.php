@@ -15,7 +15,7 @@ class AdminTransactionController extends Controller
     public function index()
     {
         $this->syncPendingTransactions();
-        $transactions = Transaction::with(['table', 'items.product'])->latest()->get();
+        $transactions = Transaction::with(['table', 'items.product'])->latest()->paginate(10);
         $tables   = Table::orderBy('number')->get();
         $products = Product::with('category')->orderBy('name')->get();
         return view('admin.transaction.index', compact('transactions', 'tables', 'products'));
@@ -34,7 +34,7 @@ class AdminTransactionController extends Controller
             'table_id'           => 'required|exists:tables,id',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.quantity'   => 'required|integer|min:1|max:50',
         ]);
 
         $totalPrice = 0;
@@ -85,7 +85,7 @@ $request->validate([
             'status'             => 'required|in:pending,lunas,selesai,cancelled',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.quantity'   => 'required|integer|min:1|max:50',
         ]);
 
         $totalPrice = 0;

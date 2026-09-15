@@ -13,6 +13,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\OrderController;
 use App\Models\Product;
+use App\Models\Transaction;
 
 
 Route::get('/', [HomeController::class, 'index']);
@@ -49,6 +50,15 @@ Route::get('/order/{code}', [OrderController::class, 'index'])->name('order.inde
 // API for client menu
 Route::get('/api/menu', function () {
     return response()->json(Product::with('category')->where('stock', '>', 0)->get());
+});
+
+// API for client order status check
+Route::get('/api/order-status/{orderId}', function ($orderId) {
+    $transaction = Transaction::where('order_id', $orderId)->first();
+    if (!$transaction) {
+        return response()->json(['status' => 'not_found'], 404);
+    }
+    return response()->json(['status' => $transaction->status]);
 });
 
 require __DIR__.'/auth.php';

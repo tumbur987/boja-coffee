@@ -125,6 +125,15 @@
 
         .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cart-btn-wrapper { position: relative; }
+
+        .ready-notification { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,14,10,0.92); display: none; align-items: center; justify-content: center; z-index: 300; }
+        .ready-notification.show { display: flex; }
+        .ready-box { background: var(--white); border-radius: 24px; padding: 48px 36px; text-align: center; max-width: 360px; width: 90%; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .ready-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(34,197,94,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; animation: bounce 0.6s ease; }
+        @keyframes bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        .ready-box h2 { font-size: 22px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+        .ready-box p { font-size: 14px; color: var(--text-light); line-height: 1.6; margin-bottom: 24px; }
+        .ready-btn { background: var(--coffee); color: white; border: none; padding: 12px 32px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; }
     </style>
 </head>
 <body>
@@ -217,6 +226,17 @@
             <div class="table-code">Meja {{ $table->number }}</div>
             <br>
             <button class="success-btn" id="successBtn">Pesan Lagi</button>
+        </div>
+    </div>
+
+    <div class="ready-notification" id="readyNotification">
+        <div class="ready-box">
+            <div class="ready-icon">&#127861;</div>
+            <h2>Pesanan Siap!</h2>
+            <p>Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.</p>
+            <div class="table-code">Meja {{ $table->number }}</div>
+            <br>
+            <button class="ready-btn" id="readyBtn">OK</button>
         </div>
     </div>
 

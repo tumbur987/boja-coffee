@@ -12,7 +12,7 @@ class AdminTableController extends Controller
 {
     public function index()
     {
-        $tables = Table::latest()->get();
+        $tables = Table::latest()->paginate(10);
         return view('admin.table.index', compact('tables'));
     }
 

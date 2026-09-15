@@ -12,7 +12,7 @@ class AdminProductController extends Controller
 {
     public function index()
     {
-        $products   = Product::with('category')->latest()->get();
+        $products   = Product::with('category')->latest()->paginate(10);
         $categories = Category::orderBy('name')->get();
         return view('admin.product.index', compact('products', 'categories'));
     }

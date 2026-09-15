@@ -19,7 +19,7 @@ class MidtransController extends Controller
             'customer_name'   => 'required|string|max:255',
             'items'           => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.quantity'   => 'required|integer|min:1|max:50',
         ]);
 
         $totalPrice = 0;

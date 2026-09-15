@@ -22,7 +22,7 @@
                 <tbody>
                     @forelse ($users as $user)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
                         <td style="font-weight:600;">{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>
@@ -65,6 +65,12 @@
                     @endforelse
                 </tbody>
             </table>
+            @if($users->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                <small style="color:var(--text-muted);">Menampilkan {{ $users->firstItem() }}-{{ $users->lastItem() }} dari {{ $users->total() }} data</small>
+                {{ $users->links() }}
+            </div>
+            @endif
         </div>
     </div>
 
