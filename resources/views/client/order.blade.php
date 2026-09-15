@@ -53,7 +53,7 @@
         .menu-list { padding: 4px 16px; }
         .menu-card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid rgba(44,24,16,0.04); transition: all 0.2s; }
         .menu-card:hover { box-shadow: var(--shadow-lg); }
-        .menu-card.menu-habis { opacity: 0.55; pointer-events: none; filter: grayscale(30%); }
+        .menu-card.menu-habis { opacity: 0.6; filter: grayscale(30%); position: relative; }
         .menu-card.menu-habis .menu-price { color: var(--text-light); text-decoration: line-through; }
         .habis-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .menu-stock { font-size: 11px; color: var(--text-light); font-weight: 500; margin-bottom: 4px; }
@@ -293,7 +293,7 @@
          data-csrf="{{ csrf_token() }}"
          data-client-key="{{ config('midtrans.client_key') }}"
          style="display:none;"></div>
-    <script src="{{ asset('js/order.js') }}"></script>
+    <script src="{{ asset('js/order.js') }}?v={{ time() }}"></script>
     <script src="https://app.sandbox.midtrans.com/snap/snap.js"
             data-client-key="{{ config('midtrans.client_key') }}" async></script>
 </body>
