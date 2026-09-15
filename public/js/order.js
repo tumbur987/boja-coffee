@@ -11,6 +11,7 @@
     var pollingTimer = null;
     var readyPollingTimer = null;
     var lastCustomerName = '';
+    var pageLoadedAt = new Date().toISOString();
     var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
 
     fetch('/api/menu')
@@ -198,6 +199,7 @@
             if (data.token && data.order_id) {
                 pendingOrderId = data.order_id;
                 updateStatus('pending');
+                refreshHistory();
                 snap.pay(data.token, {
                     onSuccess: function() {
                         fetch('/midtrans/payment-status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken }, body: JSON.stringify({ order_id: pendingOrderId }) })
@@ -300,10 +302,16 @@
         if (view === 'history') loadHistory();
     }
 
+    window.refreshHistory = function() {
+        if (document.getElementById('historySection').style.display === 'block') {
+            loadHistory();
+        }
+    }
+
     function loadHistory() {
         var name = getCustomerName();
-        var url = '/api/order-history/' + tableId;
-        if (name) url += '?customer_name=' + encodeURIComponent(name);
+        var url = '/api/order-history/' + tableId + '?since=' + encodeURIComponent(pageLoadedAt);
+        if (name) url += '&customer_name=' + encodeURIComponent(name);
         var container = document.getElementById('historyList');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         fetch(url).then(function(r) { return r.json(); }).then(function(data) { renderHistory(data); })
