@@ -111,6 +111,51 @@
 </div>
 @endif
 
+@if($lowStockProducts->count() > 0)
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card" style="border-left: 4px solid #f59e0b;">
+            <div class="card-header" style="background: rgba(245,158,11,0.04);">
+                <h5 class="card-title" style="font-weight: 800; color: #d97706; margin: 0;">
+                    <i class="fas fa-exclamation-circle mr-1"></i> Stok Hampir Habis — Segera Restock
+                    <span class="badge badge-warning ml-2" style="font-size: 12px;">{{ $lowStockProducts->count() }} produk</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Produk</th>
+                            <th>Kategori</th>
+                            <th>Harga</th>
+                            <th>Sisa Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($lowStockProducts as $product)
+                        <tr>
+                            <td style="font-weight: 700;">{{ $product->name }}</td>
+                            <td>{{ $product->category->name ?? '-' }}</td>
+                            <td style="font-weight: 600;">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
+                            <td>
+                                <span class="badge badge-warning" style="font-size: 12px; padding: 5px 10px;">Stok: {{ $product->stock }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ route('product.index') }}" class="btn btn-sm" style="background: #f59e0b; color: white; border-radius: 8px; font-weight: 600; font-size: 12px;">
+                                    <i class="fas fa-edit mr-1"></i> Restock
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="row">
     <div class="col-lg-8">
         <div class="card">

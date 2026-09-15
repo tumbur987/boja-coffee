@@ -73,12 +73,15 @@ class AdminDashboardController extends Controller
         // Produk stok habis
         $outOfStockProducts = Product::where('stock', '<=', 0)->get();
 
+        // Produk stok hampir habis (1-9)
+        $lowStockProducts = Product::where('stock', '>', 0)->where('stock', '<', 10)->get();
+
         return view('admin.dashboard.index', compact(
             'chartLabels', 'chartCounts', 'chartRevenue',
             'statusCounts', 'topProducts',
             'todayRevenue', 'todayCount', 'monthRevenue',
             'visitorLabels', 'visitorCounts',
-            'outOfStockProducts'
+            'outOfStockProducts', 'lowStockProducts'
         ));
     }
 
