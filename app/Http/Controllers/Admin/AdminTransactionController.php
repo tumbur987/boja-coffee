@@ -127,6 +127,7 @@ $request->validate([
     public function markSelesai(Transaction $transaction)
     {
         $transaction->update(['status' => 'selesai']);
+        $this->deductStock($transaction);
         return redirect()->route('transaction.index')->with('success', 'Pesanan ditandai selesai.');
     }
 
@@ -156,6 +157,7 @@ $request->validate([
 
                 if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                     $transaction->update(['status' => 'lunas']);
+                    $this->deductStock($transaction);
                     Log::info('sync: transaksi lunas', ['order_id' => $transaction->order_id]);
                 } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
                     $transaction->update(['status' => 'cancelled']);
@@ -165,5 +167,23 @@ $request->validate([
                 Log::error('sync: gagal cek', ['order_id' => $transaction->order_id, 'error' => $e->getMessage()]);
             }
         }
+    }
+
+    private function deductStock(Transaction $transaction)
+    {
+        if ($transaction->stock_deducted) return;
+
+        $transaction->load('items.product');
+        foreach ($transaction->items as $item) {
+            if ($item->product) {
+                $item->product->decrement('stock', $item->quantity);
+                Log::info('stock dikurangi (admin)', [
+                    'product' => $item->product->name,
+                    'qty' => $item->quantity,
+                    'sisa' => $item->product->stock
+                ]);
+            }
+        }
+        $transaction->update(['stock_deducted' => true]);
     }
 }

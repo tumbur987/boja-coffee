@@ -132,6 +132,8 @@ class AdminDashboardController extends Controller
 
     private function deductStock(Transaction $transaction)
     {
+        if ($transaction->stock_deducted) return;
+
         $transaction->load('items.product');
         foreach ($transaction->items as $item) {
             if ($item->product) {
@@ -143,5 +145,6 @@ class AdminDashboardController extends Controller
                 ]);
             }
         }
+        $transaction->update(['stock_deducted' => true]);
     }
 }

@@ -147,6 +147,7 @@ class MidtransController extends Controller
         }
 
         if ($transaction->status === 'lunas') {
+            $this->deductStock($transaction);
             Log::info('payment-status: sudah lunas', ['order_id' => $orderId]);
             return response()->json(['success' => true, 'status' => 'lunas']);
         }
@@ -184,6 +185,8 @@ class MidtransController extends Controller
 
     private function deductStock(Transaction $transaction)
     {
+        if ($transaction->stock_deducted) return;
+
         $transaction->load('items.product');
         foreach ($transaction->items as $item) {
             if ($item->product) {
@@ -195,5 +198,6 @@ class MidtransController extends Controller
                 ]);
             }
         }
+        $transaction->update(['stock_deducted' => true]);
     }
 }
