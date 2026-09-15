@@ -94,19 +94,15 @@
         select.form-control { appearance: auto !important; }
 
         /* Modals */
-        .modal-content { border: none !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important; animation: modalIn 0.25s ease-out; }
-        .modal-dialog { max-width: 820px !important; margin: 1.75rem auto !important; }
+        .modal-content { border: none !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important; }
         .modal-header { border-bottom: 1px solid rgba(44,24,16,0.06) !important; padding: 18px 24px !important; }
         .modal-header .modal-title { font-weight: 700 !important; color: var(--coffee-dark) !important; font-size: 17px !important; }
         .modal-header .close { font-size: 22px !important; padding: 4px 8px !important; border-radius: var(--radius-xs) !important; transition: all 0.2s !important; }
         .modal-header .close:hover { background: var(--cream-lighter) !important; }
-        .modal-body { padding: 24px 28px !important; overflow-y: auto; max-height: calc(100vh - 180px) !important; }
+        .modal-body { padding: 24px !important; max-height: calc(100vh - 180px) !important; overflow-y: auto; }
         .modal-body .form-group label { display: block !important; margin-bottom: 6px !important; }
-        .modal-body .row { margin-left: -8px !important; margin-right: -8px !important; }
-        .modal-body .row > [class*="col-"] { padding-left: 8px !important; padding-right: 8px !important; }
         .modal-footer { border-top: 1px solid rgba(44,24,16,0.06) !important; padding: 16px 24px !important; }
         .modal-backdrop.show { backdrop-filter: blur(4px); background: rgba(44,24,16,0.4) !important; }
-        @keyframes modalIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Badges */
         .badge { font-weight: 600 !important; padding: 5px 10px !important; border-radius: 6px !important; font-size: 11px !important; }
