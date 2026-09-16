@@ -157,7 +157,6 @@ $request->validate([
 
                 if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                     $transaction->update(['status' => 'lunas']);
-                    $this->deductStock($transaction);
                     Log::info('sync: transaksi lunas', ['order_id' => $transaction->order_id]);
                 } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
                     $transaction->update(['status' => 'cancelled']);
@@ -171,10 +170,6 @@ $request->validate([
 
     private function deductStock(Transaction $transaction)
     {
-        \Illuminate\Support\Facades\DB::purge('sqlite');
-        $already = \Illuminate\Support\Facades\DB::table('transactions')->where('id', $transaction->id)->value('stock_deducted');
-        if ($already) return;
-
         $transaction->load('items.product');
         foreach ($transaction->items as $item) {
             if ($item->product) {
@@ -186,6 +181,5 @@ $request->validate([
                 ]);
             }
         }
-        \Illuminate\Support\Facades\DB::table('transactions')->where('id', $transaction->id)->update(['stock_deducted' => 1]);
     }
 }

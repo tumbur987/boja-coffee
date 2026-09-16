@@ -9,7 +9,7 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['table_id', 'total_price', 'status', 'order_id', 'customer_name', 'stock_deducted'];
+    protected $fillable = ['table_id', 'total_price', 'status', 'order_id', 'customer_name'];
 
     public function table()
     {
