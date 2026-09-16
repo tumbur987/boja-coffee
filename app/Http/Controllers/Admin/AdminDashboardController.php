@@ -132,7 +132,9 @@ class AdminDashboardController extends Controller
 
     private function deductStock(Transaction $transaction)
     {
-        if ($transaction->stock_deducted) return;
+        \Illuminate\Support\Facades\DB::purge('sqlite');
+        $already = \Illuminate\Support\Facades\DB::table('transactions')->where('id', $transaction->id)->value('stock_deducted');
+        if ($already) return;
 
         $transaction->load('items.product');
         foreach ($transaction->items as $item) {
@@ -145,6 +147,6 @@ class AdminDashboardController extends Controller
                 ]);
             }
         }
-        $transaction->update(['stock_deducted' => true]);
+        \Illuminate\Support\Facades\DB::table('transactions')->where('id', $transaction->id)->update(['stock_deducted' => 1]);
     }
 }
