@@ -94,6 +94,14 @@ class MidtransController extends Controller
             $transaction->delete();
             Log::error('Midtrans Snap gagal: '.$e->getMessage());
 
+            $msg = $e->getMessage();
+            if (str_contains($msg, '401') || str_contains($msg, 'unauthorized') || str_contains($msg, 'Access denied')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Konfigurasi pembayaran bermasalah. Silakan hubungi admin.',
+                ], 500);
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membuat pembayaran. Silakan coba lagi.',
