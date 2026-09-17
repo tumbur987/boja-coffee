@@ -25,9 +25,17 @@ class MidtransController extends Controller
         $totalPrice = 0;
         $itemsData = [];
         $itemDetails = [];
+        $outOfStockItems = [];
 
         foreach ($request->items as $item) {
             $product = Product::findOrFail($item['product_id']);
+
+            if ($product->stock <= 0) {
+                $outOfStockItems[] = $product->name . ' (stok habis)';
+            } elseif ($product->stock < $item['quantity']) {
+                $outOfStockItems[] = $product->name . ' (stok tersisa ' . $product->stock . ')';
+            }
+
             $totalPrice += $product->price * $item['quantity'];
             $itemsData[] = [
                 'product_id' => $product->id,
@@ -40,6 +48,14 @@ class MidtransController extends Controller
                 'price' => $product->price,
                 'quantity' => $item['quantity'],
             ];
+        }
+
+        if (!empty($outOfStockItems)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Stok tidak tersedia: ' . implode(', ', $outOfStockItems),
+                'out_of_stock' => true,
+            ], 422);
         }
 
         $orderId = 'SIBOJA-'.strtoupper(Str::random(6)).'-'.time();

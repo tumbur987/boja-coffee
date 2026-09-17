@@ -268,10 +268,29 @@
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
             body: JSON.stringify({ table_id: tableId, customer_name: cname, items: items })
         })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
+        .then(function(r) {
+            return r.json().then(function(data) {
+                return { ok: r.ok, status: r.status, data: data };
+            });
+        })
+        .then(function(result) {
             btns.forEach(function(btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang'; });
             document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
+
+            if (!result.ok) {
+                if (result.data && result.data.out_of_stock) {
+                    showToast(result.data.message || 'Stok tidak tersedia. Silakan periksa menu.');
+                    fetch('/api/menu')
+                    .then(function(r2) { return r2.json(); })
+                    .then(function(freshData) { allProducts = freshData; renderMenu(getFilteredProducts()); })
+                    .catch(function() {});
+                } else {
+                    showToast((result.data && result.data.message) || 'Terjadi kesalahan. Silakan coba lagi.');
+                }
+                return;
+            }
+
+            var data = result.data;
             if (data.token && data.order_id) {
                 pendingOrderId = data.order_id;
                 updateStatus('pending');
@@ -282,7 +301,7 @@
                 snap.pay(data.token, {
                     onSuccess: function() {
                         fetch('/midtrans/payment-status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken }, body: JSON.stringify({ order_id: pendingOrderId }) })
-                        .then(function(r) { return r.json(); })
+                        .then(function(r2) { return r2.json(); })
                         .then(function() { updateStatus('lunas'); })
                         .catch(function() { updateStatus('lunas'); });
                     },
@@ -297,7 +316,7 @@
         .catch(function() {
             btns.forEach(function(btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang'; });
             document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
-            showToast('Gagal menghubungi server.');
+            showToast('Gagal menghubungi server. Periksa koneksi internet Anda.');
         });
     };
 
