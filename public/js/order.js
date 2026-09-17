@@ -15,13 +15,13 @@
     var pageLoadedAt = new Date().toISOString();
     var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
 
-    function showToast(message, icon) {
+    function showToast(message, icon, title) {
         var existing = document.getElementById('stockToast');
         if (existing) existing.remove();
         var toast = document.createElement('div');
         toast.id = 'stockToast';
         toast.style.cssText = 'position:fixed; top:20px; right:20px; z-index:99999; background:#fff; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.15); padding:16px 20px; display:flex; align-items:center; gap:12px; max-width:360px; animation:toastIn 0.3s ease-out; font-family:inherit;';
-        toast.innerHTML = '<div style="font-size:24px;">' + (icon || '&#9888;') + '</div><div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#2c1810; margin-bottom:2px;">Menu tidak tersedia</div><div style="font-size:13px; color:#8b7355; line-height:1.4;">' + message + '</div></div><button onclick="this.parentElement.remove()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#8b7355; padding:4px;">&times;</button>';
+        toast.innerHTML = '<div style="font-size:24px;">' + (icon || '&#9888;') + '</div><div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#2c1810; margin-bottom:2px;">' + (title || 'Menu tidak tersedia') + '</div><div style="font-size:13px; color:#8b7355; line-height:1.4;">' + message + '</div></div><button onclick="this.parentElement.remove()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#8b7355; padding:4px;">&times;</button>';
         document.body.appendChild(toast);
         setTimeout(function() {
             if (toast.parentElement) {
@@ -38,7 +38,8 @@
     document.head.appendChild(style);
 
     function isOutOfStock(product) {
-        return product.stock <= 0;
+        var s = parseInt(product.stock);
+        return isNaN(s) || s <= 0;
     }
 
     function getFilteredProducts() {
@@ -46,12 +47,18 @@
     }
 
     fetch('/api/menu')
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    })
     .then(function(data) {
         allProducts = data;
         renderTabs(data);
         renderMenu(data);
         startStockPolling();
+    })
+    .catch(function() {
+        document.getElementById('menuList').innerHTML = '<div class="empty"><i class="fas fa-wifi" style="color:#ef4444;"></i><p style="color:#ef4444; font-weight:600;">Gagal memuat menu</p><p style="font-size:12px; margin-top:8px;">Periksa koneksi internet dan muat ulang halaman</p></div>';
     });
 
     function renderTabs(products) {
@@ -283,7 +290,9 @@
                     fetch('/api/menu')
                     .then(function(r2) { return r2.json(); })
                     .then(function(freshData) { allProducts = freshData; renderMenu(getFilteredProducts()); })
-                    .catch(function() {});
+            .catch(function() {
+                document.getElementById('menuList').innerHTML = '<div class="empty"><i class="fas fa-wifi" style="color:#ef4444;"></i><p style="color:#ef4444; font-weight:600;">Koneksi terputus</p><p style="font-size:12px; margin-top:8px;">Menu akan dimuat ulang secara otomatis...</p></div>';
+            });
                 } else {
                     showToast((result.data && result.data.message) || 'Terjadi kesalahan. Silakan coba lagi.');
                 }
@@ -316,7 +325,7 @@
         .catch(function() {
             btns.forEach(function(btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Pesan Sekarang'; });
             document.getElementById('cartBtn').innerHTML = '<i class="fas fa-shopping-bag"></i> Keranjang';
-            showToast('Gagal menghubungi server. Periksa koneksi internet Anda.');
+            showToast('Gagal menghubungi server. Periksa koneksi internet Anda.', '&#127760;', 'Koneksi Gagal');
         });
     };
 
@@ -434,7 +443,6 @@
         var name = getCustomerName();
         var url = '/api/order-history/' + tableId;
         if (name) url += '?customer_name=' + encodeURIComponent(name);
-        if (name) url += '&customer_name=' + encodeURIComponent(name);
         var container = document.getElementById('historyList');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         fetch(url).then(function(r) { return r.json(); }).then(function(data) { renderHistory(data); })
