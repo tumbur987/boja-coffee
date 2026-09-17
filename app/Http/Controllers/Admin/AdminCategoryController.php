@@ -11,6 +11,7 @@ class AdminCategoryController extends Controller
     public function index()
     {
         $categories = Category::latest()->paginate(10);
+
         return view('admin.category.index', compact('categories'));
     }
 
@@ -26,6 +27,7 @@ class AdminCategoryController extends Controller
             ['name.unique' => 'Nama kategori sudah ada. Silakan gunakan nama lain.']
         );
         Category::create($validated);
+
         return redirect()->route('category.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
 
@@ -42,16 +44,18 @@ class AdminCategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $validated = $request->validate(
-            ['name' => 'required|string|max:255|unique:categories,name,' . $category->id],
+            ['name' => 'required|string|max:255|unique:categories,name,'.$category->id],
             ['name.unique' => 'Nama kategori sudah ada. Silakan gunakan nama lain.']
         );
         $category->update($validated);
+
         return redirect()->route('category.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
+
         return redirect()->route('category.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

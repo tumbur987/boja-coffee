@@ -1,23 +1,21 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AdminUserController;
-use App\Http\Controllers\Admin\AdminProductController;
-use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminTableController;
 use App\Http\Controllers\Admin\AdminTransactionController;
-use App\Http\Controllers\Admin\AdminSettingController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProfileController;
 use App\Models\Product;
 use App\Models\Transaction;
-
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index']);
-
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -55,9 +53,10 @@ Route::get('/api/menu', function () {
 // API for client order status check
 Route::get('/api/order-status/{orderId}', function ($orderId) {
     $transaction = Transaction::where('order_id', $orderId)->first();
-    if (!$transaction) {
+    if (! $transaction) {
         return response()->json(['status' => 'not_found'], 404);
     }
+
     return response()->json(['status' => $transaction->status]);
 });
 

@@ -12,6 +12,7 @@ class AdminUserController extends Controller
     public function index()
     {
         $users = User::latest()->paginate(10);
+
         return view('admin.user.index', compact('users'));
     }
 
@@ -23,19 +24,19 @@ class AdminUserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|in:admin,user',
-            'status'   => 'required|in:active,inactive',
+            'role' => 'required|in:admin,user',
+            'status' => 'required|in:active,inactive',
         ]);
 
         User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role'     => $validated['role'],
-            'status'   => $validated['status'],
+            'role' => $validated['role'],
+            'status' => $validated['status'],
         ]);
 
         return redirect()->route('user.index')->with('success', 'User berhasil ditambahkan.');
@@ -54,9 +55,9 @@ class AdminUserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name'   => 'required|string|max:255',
-            'email'  => 'required|email|unique:users,email,' . $user->id,
-            'role'   => 'required|in:admin,user',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'role' => 'required|in:admin,user',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -68,12 +69,14 @@ class AdminUserController extends Controller
         }
 
         $user->update($data);
+
         return redirect()->route('user.index')->with('success', 'User berhasil diperbarui.');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
+
         return redirect()->route('user.index')->with('success', 'User berhasil dihapus.');
     }
 }

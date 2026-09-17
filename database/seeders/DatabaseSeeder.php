@@ -15,20 +15,20 @@ class DatabaseSeeder extends Seeder
     {
         // Admin user
         User::create([
-            'name'     => 'Admin',
-            'email'    => 'admin@boja.com',
+            'name' => 'Admin',
+            'email' => 'admin@boja.com',
             'password' => Hash::make('password'),
-            'role'     => 'admin',
-            'status'   => 'active',
+            'role' => 'admin',
+            'status' => 'active',
         ]);
 
         // Default user
         User::create([
-            'name'     => 'User',
-            'email'    => 'user@boja.com',
+            'name' => 'User',
+            'email' => 'user@boja.com',
             'password' => Hash::make('password'),
-            'role'     => 'user',
-            'status'   => 'active',
+            'role' => 'user',
+            'status' => 'active',
         ]);
 
         // Categories

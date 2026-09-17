@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Midtrans\Snap;
 
@@ -15,15 +15,15 @@ class MidtransController extends Controller
     public function createTransaction(Request $request)
     {
         $request->validate([
-            'table_id'        => 'required|exists:tables,id',
-            'customer_name'   => 'required|string|max:255',
-            'items'           => 'required|array|min:1',
+            'table_id' => 'required|exists:tables,id',
+            'customer_name' => 'required|string|max:255',
+            'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity'   => 'required|integer|min:1|max:50',
+            'items.*.quantity' => 'required|integer|min:1|max:50',
         ]);
 
         $totalPrice = 0;
-        $itemsData  = [];
+        $itemsData = [];
         $itemDetails = [];
 
         foreach ($request->items as $item) {
@@ -31,25 +31,25 @@ class MidtransController extends Controller
             $totalPrice += $product->price * $item['quantity'];
             $itemsData[] = [
                 'product_id' => $product->id,
-                'quantity'   => $item['quantity'],
-                'price'      => $product->price,
+                'quantity' => $item['quantity'],
+                'price' => $product->price,
             ];
             $itemDetails[] = [
-                'id'       => $product->id,
-                'name'     => $product->name,
-                'price'    => $product->price,
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
                 'quantity' => $item['quantity'],
             ];
         }
 
-        $orderId = 'SIBOJA-' . strtoupper(Str::random(6)) . '-' . time();
+        $orderId = 'SIBOJA-'.strtoupper(Str::random(6)).'-'.time();
 
         $transaction = Transaction::create([
-            'table_id'       => $request->table_id,
-            'customer_name'  => $request->customer_name,
-            'total_price'    => $totalPrice,
-            'status'         => 'pending',
-            'order_id'       => $orderId,
+            'table_id' => $request->table_id,
+            'customer_name' => $request->customer_name,
+            'total_price' => $totalPrice,
+            'status' => 'pending',
+            'order_id' => $orderId,
         ]);
 
         foreach ($itemsData as $item) {
@@ -58,24 +58,26 @@ class MidtransController extends Controller
 
         $params = [
             'transaction_details' => [
-                'order_id'     => $orderId,
+                'order_id' => $orderId,
                 'gross_amount' => $totalPrice,
             ],
             'item_details' => $itemDetails,
             'customer_details' => [
                 'first_name' => $request->customer_name,
-                'email'      => 'customer@siboja.com',
-                'phone'      => '-',
+                'email' => 'customer@siboja.com',
+                'phone' => '-',
             ],
         ];
 
         try {
             $snapToken = Snap::getSnapToken($params);
+
             return response()->json(['token' => $snapToken, 'order_id' => $orderId]);
         } catch (\Exception $e) {
             $transaction->items()->delete();
             $transaction->delete();
-            Log::error('Midtrans Snap gagal: ' . $e->getMessage());
+            Log::error('Midtrans Snap gagal: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membuat pembayaran. Silakan coba lagi.',
@@ -87,28 +89,31 @@ class MidtransController extends Controller
     {
         Log::info('midtrans notification dipanggil', $request->all());
 
-        $serverKey  = config('midtrans.server_key');
-        $signature  = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+        $serverKey = config('midtrans.server_key');
+        $signature = hash('sha512', $request->order_id.$request->status_code.$request->gross_amount.$serverKey);
 
-        if (!hash_equals($signature, (string) $request->signature_key)) {
+        if (! hash_equals($signature, (string) $request->signature_key)) {
             Log::warning('midtrans notification: signature invalid', ['order_id' => $request->order_id]);
+
             return response()->json(['status' => 'invalid signature'], 403);
         }
 
         $transaction = Transaction::where('order_id', $request->order_id)->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             Log::warning('midtrans notification: order not found', ['order_id' => $request->order_id]);
+
             return response()->json(['status' => 'order not found'], 404);
         }
 
         if ((int) $request->gross_amount !== (int) $transaction->total_price) {
             Log::warning('midtrans notification: amount mismatch', ['order_id' => $request->order_id]);
+
             return response()->json(['status' => 'amount mismatch'], 400);
         }
 
         $transactionStatus = $request->transaction_status;
-        $fraudStatus       = $request->fraud_status;
+        $fraudStatus = $request->fraud_status;
 
         Log::info('midtrans notification: status diterima', [
             'order_id' => $request->order_id,
@@ -137,8 +142,9 @@ class MidtransController extends Controller
 
         $transaction = Transaction::where('order_id', $orderId)->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             Log::warning('payment-status: transaksi tidak ditemukan', ['order_id' => $orderId]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Pesanan tidak ditemukan.',
@@ -147,6 +153,7 @@ class MidtransController extends Controller
 
         if ($transaction->status === 'lunas') {
             Log::info('payment-status: sudah lunas', ['order_id' => $orderId]);
+
             return response()->json(['success' => true, 'status' => 'lunas']);
         }
 
@@ -156,7 +163,7 @@ class MidtransController extends Controller
             $baseUrl = $isProduction ? 'https://api.midtrans.com' : 'https://api.sandbox.midtrans.com';
 
             $response = Http::withBasicAuth($serverKey, '')
-                ->get($baseUrl . '/v2/' . $orderId . '/status');
+                ->get($baseUrl.'/v2/'.$orderId.'/status');
 
             $body = $response->json();
             $transactionStatus = $body['transaction_status'] ?? null;
@@ -171,6 +178,7 @@ class MidtransController extends Controller
             if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                 $transaction->update(['status' => 'lunas']);
                 Log::info('payment-status: BERHASIL lunas', ['order_id' => $orderId]);
+
                 return response()->json(['success' => true, 'status' => 'lunas']);
             }
         } catch (\Exception $e) {
@@ -179,5 +187,4 @@ class MidtransController extends Controller
 
         return response()->json(['success' => false, 'status' => $transaction->status]);
     }
-}
 }

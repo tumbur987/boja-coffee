@@ -12,6 +12,7 @@ class AdminSettingController extends Controller
     public function index()
     {
         $settings = Setting::allKeyValue();
+
         return view('admin.setting.index', compact('settings'));
     }
 

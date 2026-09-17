@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Transaction;
 use App\Models\Product;
+use App\Models\Transaction;
 use App\Models\TransactionItem;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AdminDashboardController extends Controller
 {
-     public function index()
+    public function index()
     {
         $this->syncPendingTransactions();
 
@@ -23,12 +22,12 @@ class AdminDashboardController extends Controller
             DB::raw('COUNT(*) as total'),
             DB::raw('SUM(total_price) as revenue')
         )
-        ->where('created_at', '>=', now()->subDays(7))
-        ->groupBy(DB::raw('DATE(created_at)'))
-        ->orderBy('date')
-        ->get();
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy('date')
+            ->get();
 
-        $chartLabels = $dailyTransactions->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'));
+        $chartLabels = $dailyTransactions->pluck('date')->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M'));
         $chartCounts = $dailyTransactions->pluck('total');
         $chartRevenue = $dailyTransactions->pluck('revenue');
 
@@ -39,7 +38,7 @@ class AdminDashboardController extends Controller
 
         // Menu terlaris
         $topProducts = TransactionItem::select('product_id', DB::raw('SUM(quantity) as total_qty'))
-            ->whereHas('transaction', fn($q) => $q->where('status', '!=', 'cancelled'))
+            ->whereHas('transaction', fn ($q) => $q->where('status', '!=', 'cancelled'))
             ->groupBy('product_id')
             ->orderByDesc('total_qty')
             ->limit(5)
@@ -62,12 +61,12 @@ class AdminDashboardController extends Controller
             DB::raw('DATE(created_at) as date'),
             DB::raw('COUNT(*) as total')
         )
-        ->where('created_at', '>=', now()->subDays(30))
-        ->groupBy(DB::raw('DATE(created_at)'))
-        ->orderBy('date')
-        ->get();
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy('date')
+            ->get();
 
-        $visitorLabels = $dailyVisitors->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'));
+        $visitorLabels = $dailyVisitors->pluck('date')->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M'));
         $visitorCounts = $dailyVisitors->pluck('total');
 
         // Produk stok habis
@@ -92,7 +91,9 @@ class AdminDashboardController extends Controller
             ->where('created_at', '>=', now()->subHours(24))
             ->get();
 
-        if ($pendingTransactions->isEmpty()) return;
+        if ($pendingTransactions->isEmpty()) {
+            return;
+        }
 
         $serverKey = config('midtrans.server_key');
         $isProduction = config('midtrans.is_production', false);
@@ -102,7 +103,7 @@ class AdminDashboardController extends Controller
             try {
                 $response = Http::withBasicAuth($serverKey, '')
                     ->timeout(10)
-                    ->get($baseUrl . '/v2/' . $transaction->order_id . '/status');
+                    ->get($baseUrl.'/v2/'.$transaction->order_id.'/status');
 
                 $body = $response->json();
                 $transactionStatus = $body['transaction_status'] ?? null;
@@ -115,7 +116,9 @@ class AdminDashboardController extends Controller
                     'fraud_status' => $fraudStatus,
                 ]);
 
-                if (!$response->successful()) continue;
+                if (! $response->successful()) {
+                    continue;
+                }
 
                 if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                     $transaction->update(['status' => 'lunas']);

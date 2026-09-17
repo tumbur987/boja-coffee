@@ -12,14 +12,16 @@ class AdminProductController extends Controller
 {
     public function index()
     {
-        $products   = Product::with('category')->latest()->paginate(10);
+        $products = Product::with('category')->latest()->paginate(10);
         $categories = Category::orderBy('name')->get();
+
         return view('admin.product.index', compact('products', 'categories'));
     }
 
     public function create()
     {
         $categories = Category::orderBy('name')->get();
+
         return view('admin.product.create', compact('categories'));
     }
 
@@ -27,10 +29,10 @@ class AdminProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name'        => 'required|string|max:255|unique:products,name',
-            'stock'       => 'required|integer|min:0',
-            'price'       => 'required|integer|min:0',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'name' => 'required|string|max:255|unique:products,name',
+            'stock' => 'required|integer|min:0',
+            'price' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             'name.unique' => 'Nama produk sudah ada. Silakan gunakan nama lain.',
         ]);
@@ -56,6 +58,7 @@ class AdminProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::orderBy('name')->get();
+
         return view('admin.product.edit', compact('product', 'categories'));
     }
 
@@ -63,10 +66,10 @@ class AdminProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name'        => 'required|string|max:255|unique:products,name,' . $product->id,
-            'stock'       => 'required|integer|min:0',
-            'price'       => 'required|integer|min:0',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'name' => 'required|string|max:255|unique:products,name,'.$product->id,
+            'stock' => 'required|integer|min:0',
+            'price' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             'name.unique' => 'Nama produk sudah ada. Silakan gunakan nama lain.',
         ]);
@@ -81,6 +84,7 @@ class AdminProductController extends Controller
         }
 
         $product->update($data);
+
         return redirect()->route('product.index')->with('success', 'Produk berhasil diperbarui.');
     }
 
@@ -90,6 +94,7 @@ class AdminProductController extends Controller
             Storage::disk('public')->delete($product->image);
         }
         $product->delete();
+
         return redirect()->route('product.index')->with('success', 'Produk berhasil dihapus.');
     }
 }
