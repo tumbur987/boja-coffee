@@ -140,7 +140,7 @@ class AdminTransactionController extends Controller
     {
         $pendingTransactions = Transaction::where('status', 'pending')
             ->whereNotNull('order_id')
-            ->where('created_at', '>=', now()->subHours(24))
+            ->where('created_at', '>=', now()->subMinutes(30))
             ->get();
 
         if ($pendingTransactions->isEmpty()) {
