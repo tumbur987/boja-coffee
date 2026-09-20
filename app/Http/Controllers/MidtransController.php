@@ -83,6 +83,11 @@ class MidtransController extends Controller
                 'email' => 'customer@siboja.com',
                 'phone' => '-',
             ],
+            'expiry' => [
+                'start_time' => date('Y-m-d H:i:s O'),
+                'duration' => 30,
+                'unit' => 'minute',
+            ],
         ];
 
         try {

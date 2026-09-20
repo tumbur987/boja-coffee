@@ -11,6 +11,8 @@
     var pollingTimer = null;
     var readyPollingTimer = null;
     var stockPollingTimer = null;
+    var countdownInterval = null;
+    var paymentDeadline = null;
     var lastCustomerName = '';
     var pageLoadedAt = new Date().toISOString();
     var emojis = ['&#9749;', '&#127861;', '&#129380;', '&#127856;', '&#129361;', '&#127854;', '&#127853;', '&#127857;'];
@@ -332,6 +334,7 @@
     function updateStatus(status) {
         var overlay = document.getElementById('successOverlay');
         if (status === 'lunas') {
+            stopCountdown();
             document.getElementById('successTitle').textContent = 'Pembayaran Berhasil!';
             document.getElementById('successDesc').textContent = 'Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.';
             document.getElementById('successIcon').innerHTML = '&#10003;';
@@ -343,7 +346,16 @@
             document.getElementById('successDesc').textContent = 'Selesaikan pembayaran agar pesanan diproses.';
             document.getElementById('successIcon').innerHTML = '&#8987;';
             overlay.classList.add('show');
+            startCountdown();
+        } else if (status === 'expired') {
+            stopPaymentPolling();
+            document.getElementById('successTitle').textContent = 'Pembayaran Kedaluwarsa';
+            document.getElementById('successDesc').textContent = 'Batas waktu pembayaran telah habis. Silakan pesan ulang.';
+            document.getElementById('successIcon').innerHTML = '&#10007;';
+            document.getElementById('successIcon').querySelector('div') || (document.getElementById('successIcon').style.background = 'rgba(239,68,68,0.1)');
+            overlay.classList.add('show');
         } else {
+            stopCountdown();
             document.getElementById('successTitle').textContent = 'Pembayaran Gagal';
             document.getElementById('successDesc').textContent = 'Silakan coba pesan ulang.';
             document.getElementById('successIcon').innerHTML = '&#10007;';
@@ -364,6 +376,45 @@
     }
 
     function stopPaymentPolling() { if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; } }
+
+    function startCountdown() {
+        stopCountdown();
+        paymentDeadline = new Date().getTime() + (30 * 60 * 1000);
+        var wrapper = document.getElementById('countdownWrapper');
+        var timerEl = document.getElementById('countdownTimer');
+        var barEl = document.getElementById('countdownBar');
+        wrapper.style.display = 'block';
+        updateCountdownDisplay(timerEl, barEl);
+        countdownInterval = setInterval(function() { updateCountdownDisplay(timerEl, barEl); }, 1000);
+    }
+
+    function updateCountdownDisplay(timerEl, barEl) {
+        var now = new Date().getTime();
+        var remaining = paymentDeadline - now;
+        if (remaining <= 0) {
+            stopCountdown();
+            timerEl.textContent = '00:00';
+            barEl.style.width = '0%';
+            barEl.style.background = 'var(--danger)';
+            updateStatus('expired');
+            return;
+        }
+        var minutes = Math.floor(remaining / 60000);
+        var seconds = Math.floor((remaining % 60000) / 1000);
+        timerEl.textContent = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        var percent = (remaining / (30 * 60 * 1000)) * 100;
+        barEl.style.width = percent + '%';
+        if (percent < 30) { barEl.style.background = 'var(--danger)'; }
+        else if (percent < 60) { barEl.style.background = '#f59e0b'; }
+    }
+
+    function stopCountdown() {
+        if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+        var wrapper = document.getElementById('countdownWrapper');
+        if (wrapper) wrapper.style.display = 'none';
+    }
+
+    window.stopCountdown = stopCountdown;
 
     function startReadyPolling() {
         if (!pendingOrderId) return;

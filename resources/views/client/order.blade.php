@@ -268,10 +268,19 @@
             <div class="success-icon" id="successIcon">&#10003;</div>
             <h2 id="successTitle">Pembayaran Berhasil!</h2>
             <p id="successDesc">Pesanan Anda sedang diproses. Silakan tunggu di meja Anda.</p>
+            <div id="countdownWrapper" style="display:none;">
+                <div style="background:var(--cream-lighter); border-radius:12px; padding:16px 20px; margin-bottom:16px;">
+                    <div style="font-size:12px; color:var(--text-light); font-weight:600; margin-bottom:6px;">Bayar dalam</div>
+                    <div id="countdownTimer" style="font-size:28px; font-weight:800; color:var(--coffee); letter-spacing:2px;">30:00</div>
+                    <div style="height:4px; background:rgba(74,44,42,0.1); border-radius:4px; margin-top:8px; overflow:hidden;">
+                        <div id="countdownBar" style="height:100%; background:var(--coffee); border-radius:4px; width:100%; transition:width 1s linear;"></div>
+                    </div>
+                </div>
+            </div>
             <div class="table-code">Meja {{ $table->number }}</div>
             <br>
-            <button class="success-btn" id="successHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;" onclick="document.getElementById('successOverlay').classList.remove('show'); switchView('history');"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
-            <button class="success-btn" id="successBtn" onclick="document.getElementById('successOverlay').classList.remove('show'); switchView('menu');"><i class="fas fa-shopping-bag"></i> Pesan Lagi</button>
+            <button class="success-btn" id="successHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;" onclick="stopCountdown(); document.getElementById('successOverlay').classList.remove('show'); switchView('history');"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
+            <button class="success-btn" id="successBtn" onclick="stopCountdown(); document.getElementById('successOverlay').classList.remove('show'); switchView('menu');"><i class="fas fa-shopping-bag"></i> Pesan Lagi</button>
         </div>
     </div>
 
