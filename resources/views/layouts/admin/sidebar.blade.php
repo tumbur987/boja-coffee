@@ -70,12 +70,14 @@
                     </a>
                 </li>
 
+                @if(Auth::check() && Auth::user()->role === 'admin')
                 <li class="nav-item">
                     <a href="{{ route('user.index') }}" class="nav-link {{ request()->routeIs('user.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-shield"></i>
                         <p>Kelola User</p>
                     </a>
                 </li>
+                @endif
 
                 <li class="nav-item" style="margin-top: 8px;">
                     <a href="{{ route('profile.edit') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
