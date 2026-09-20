@@ -4,14 +4,32 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <button class="btn btn-primary" data-toggle="modal" data-target="#createModal"><i class="fas fa-plus"></i> Tambah Transaksi</button>
         </div>
         <div class="card-body">
+            <div class="mb-3 d-flex flex-wrap" style="gap:8px;">
+                <a href="{{ route('transaction.index', ['status' => 'all']) }}" class="btn btn-sm {{ $filterStatus === 'all' ? 'btn-dark' : 'btn-outline-dark' }}">
+                    <i class="fas fa-list mr-1"></i> Semua
+                </a>
+                <a href="{{ route('transaction.index', ['status' => 'pending']) }}" class="btn btn-sm {{ $filterStatus === 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">
+                    <i class="fas fa-clock mr-1"></i> Pending
+                </a>
+                <a href="{{ route('transaction.index', ['status' => 'lunas']) }}" class="btn btn-sm {{ $filterStatus === 'lunas' ? 'btn-success' : 'btn-outline-success' }}">
+                    <i class="fas fa-check-circle mr-1"></i> Lunas
+                </a>
+                <a href="{{ route('transaction.index', ['status' => 'selesai']) }}" class="btn btn-sm {{ $filterStatus === 'selesai' ? 'btn-info' : 'btn-outline-info' }}">
+                    <i class="fas fa-flag-checkered mr-1"></i> Selesai
+                </a>
+                <a href="{{ route('transaction.index', ['status' => 'cancelled']) }}" class="btn btn-sm {{ $filterStatus === 'cancelled' ? 'btn-danger' : 'btn-outline-danger' }}">
+                    <i class="fas fa-times-circle mr-1"></i> Dibatalkan
+                </a>
+            </div>
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th style="width:40px;">No</th>
+                        <th>Tanggal</th>
                         <th>Meja</th>
                         <th>Pelanggan</th>
                         <th>Item</th>
@@ -24,6 +42,10 @@
                     @forelse ($transactions as $transaction)
                     <tr>
                         <td>{{ ($transactions->currentPage() - 1) * $transactions->perPage() + $loop->iteration }}</td>
+                        <td style="white-space:nowrap;">
+                            <div style="font-weight:600; font-size:13px;">{{ $transaction->created_at->format('d/m/Y') }}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">{{ $transaction->created_at->format('H:i') }} WIB</div>
+                        </td>
                         <td><span class="badge badge-primary">Meja {{ $transaction->table->number }}</span></td>
                         <td style="font-weight:600;">{{ $transaction->customer_name ?? '-' }}</td>
                         <td>
@@ -62,7 +84,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center" style="padding:30px; color:var(--text-muted);">
+                        <td colspan="8" class="text-center" style="padding:30px; color:var(--text-muted);">
                             <i class="fas fa-inbox" style="font-size:32px; opacity:0.3; display:block; margin-bottom:8px;"></i>
                             Belum ada transaksi
                         </td>

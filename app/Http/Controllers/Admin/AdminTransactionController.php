@@ -12,14 +12,23 @@ use Illuminate\Support\Facades\Log;
 
 class AdminTransactionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->syncPendingTransactions();
-        $transactions = Transaction::with(['table', 'items.product'])->latest()->paginate(10);
+
+        $filterStatus = $request->input('status', 'all');
+
+        $query = Transaction::with(['table', 'items.product'])->latest();
+
+        if ($filterStatus !== 'all' && in_array($filterStatus, ['pending', 'lunas', 'selesai', 'cancelled'])) {
+            $query->where('status', $filterStatus);
+        }
+
+        $transactions = $query->paginate(10)->appends(['status' => $filterStatus]);
         $tables = Table::orderBy('number')->get();
         $products = Product::with('category')->orderBy('name')->get();
 
-        return view('admin.transaction.index', compact('transactions', 'tables', 'products'));
+        return view('admin.transaction.index', compact('transactions', 'tables', 'products', 'filterStatus'));
     }
 
     public function create()
