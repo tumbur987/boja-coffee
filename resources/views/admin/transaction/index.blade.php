@@ -8,22 +8,50 @@
             <button class="btn btn-primary" data-toggle="modal" data-target="#createModal"><i class="fas fa-plus"></i> Tambah Transaksi</button>
         </div>
         <div class="card-body">
+            <form id="filterForm" method="GET" action="{{ route('transaction.index') }}">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" name="search" class="form-control" placeholder="Cari nama pelanggan atau order ID..." value="{{ $search }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="date_from" class="form-control form-control-sm" value="{{ $dateFrom }}" title="Tanggal Dari">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="date_to" class="form-control form-control-sm" value="{{ $dateTo }}" title="Tanggal Sampai">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm btn-primary btn-block"><i class="fas fa-filter mr-1"></i> Filter</button>
+                    </div>
+                </div>
+                <input type="hidden" name="status" value="{{ $filterStatus }}">
+            </form>
+
             <div class="mb-3 d-flex flex-wrap" style="gap:8px;">
-                <a href="{{ route('transaction.index', ['status' => 'all']) }}" class="btn btn-sm {{ $filterStatus === 'all' ? 'btn-dark' : 'btn-outline-dark' }}">
+                <a href="{{ route('transaction.index', ['status' => 'all', 'search' => $search, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" class="btn btn-sm {{ $filterStatus === 'all' ? 'btn-dark' : 'btn-outline-dark' }}">
                     <i class="fas fa-list mr-1"></i> Semua
                 </a>
-                <a href="{{ route('transaction.index', ['status' => 'pending']) }}" class="btn btn-sm {{ $filterStatus === 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">
+                <a href="{{ route('transaction.index', ['status' => 'pending', 'search' => $search, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" class="btn btn-sm {{ $filterStatus === 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">
                     <i class="fas fa-clock mr-1"></i> Pending
                 </a>
-                <a href="{{ route('transaction.index', ['status' => 'lunas']) }}" class="btn btn-sm {{ $filterStatus === 'lunas' ? 'btn-success' : 'btn-outline-success' }}">
+                <a href="{{ route('transaction.index', ['status' => 'lunas', 'search' => $search, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" class="btn btn-sm {{ $filterStatus === 'lunas' ? 'btn-success' : 'btn-outline-success' }}">
                     <i class="fas fa-check-circle mr-1"></i> Lunas
                 </a>
-                <a href="{{ route('transaction.index', ['status' => 'selesai']) }}" class="btn btn-sm {{ $filterStatus === 'selesai' ? 'btn-info' : 'btn-outline-info' }}">
+                <a href="{{ route('transaction.index', ['status' => 'selesai', 'search' => $search, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" class="btn btn-sm {{ $filterStatus === 'selesai' ? 'btn-info' : 'btn-outline-info' }}">
                     <i class="fas fa-flag-checkered mr-1"></i> Selesai
                 </a>
-                <a href="{{ route('transaction.index', ['status' => 'cancelled']) }}" class="btn btn-sm {{ $filterStatus === 'cancelled' ? 'btn-danger' : 'btn-outline-danger' }}">
+                <a href="{{ route('transaction.index', ['status' => 'cancelled', 'search' => $search, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" class="btn btn-sm {{ $filterStatus === 'cancelled' ? 'btn-danger' : 'btn-outline-danger' }}">
                     <i class="fas fa-times-circle mr-1"></i> Dibatalkan
                 </a>
+                @if($search || $dateFrom || $dateTo)
+                <a href="{{ route('transaction.index', ['status' => $filterStatus]) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-times mr-1"></i> Reset Filter
+                </a>
+                @endif
             </div>
             <table class="table table-bordered table-striped">
                 <thead>

@@ -17,6 +17,9 @@ class AdminTransactionController extends Controller
         $this->syncPendingTransactions();
 
         $filterStatus = $request->input('status', 'all');
+        $search = $request->input('search', '');
+        $dateFrom = $request->input('date_from', '');
+        $dateTo = $request->input('date_to', '');
 
         $query = Transaction::with(['table', 'items.product'])->latest();
 
@@ -24,11 +27,31 @@ class AdminTransactionController extends Controller
             $query->where('status', $filterStatus);
         }
 
-        $transactions = $query->paginate(10)->appends(['status' => $filterStatus]);
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('order_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $transactions = $query->paginate(10)->appends([
+            'status' => $filterStatus,
+            'search' => $search,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+        ]);
         $tables = Table::orderBy('number')->get();
         $products = Product::with('category')->orderBy('name')->get();
 
-        return view('admin.transaction.index', compact('transactions', 'tables', 'products', 'filterStatus'));
+        return view('admin.transaction.index', compact('transactions', 'tables', 'products', 'filterStatus', 'search', 'dateFrom', 'dateTo'));
     }
 
     public function create()
