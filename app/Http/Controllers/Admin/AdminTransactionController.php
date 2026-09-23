@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Table;
 use App\Models\Transaction;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -198,6 +199,7 @@ class AdminTransactionController extends Controller
 
                 if (($transactionStatus === 'capture' && $fraudStatus === 'accept') || $transactionStatus === 'settlement') {
                     $transaction->update(['status' => 'lunas']);
+                    $this->createPaymentNotification($transaction);
                     Log::info('sync: transaksi lunas', ['order_id' => $transaction->order_id]);
                 } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
                     $transaction->update(['status' => 'cancelled']);
@@ -222,5 +224,37 @@ class AdminTransactionController extends Controller
                 ]);
             }
         }
+    }
+
+    private function createPaymentNotification(Transaction $transaction)
+    {
+        $transaction->load(['table', 'items.product']);
+
+        $items = $transaction->items->map(function ($item) {
+            return $item->product->name . ' x' . $item->quantity;
+        })->implode(', ');
+
+        $title = 'Pesanan Baru - Meja ' . $transaction->table->number;
+        $message = 'Pelanggan ' . ($transaction->customer_name ?? '-') . ' telah membayar. ';
+        $message .= 'Item: ' . $items . '. ';
+        $message .= 'Total: Rp' . number_format($transaction->total_price, 0, ',', '.');
+
+        Notification::create([
+            'transaction_id' => $transaction->id,
+            'type' => 'new_order',
+            'title' => $title,
+            'message' => $message,
+            'data' => [
+                'table_number' => $transaction->table->number,
+                'customer_name' => $transaction->customer_name,
+                'items' => $transaction->items->map(fn($i) => [
+                    'name' => $i->product->name ?? '-',
+                    'quantity' => $i->quantity,
+                    'price' => $i->price,
+                ])->toArray(),
+                'total_price' => $transaction->total_price,
+            ],
+            'is_read' => false,
+        ]);
     }
 }

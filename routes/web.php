@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminTableController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\OrderController;
@@ -33,6 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('table', AdminTableController::class);
     Route::resource('transaction', AdminTransactionController::class);
     Route::post('transaction/{transaction}/selesai', [AdminTransactionController::class, 'markSelesai'])->name('transaction.selesai');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
 
     Route::middleware('admin')->group(function () {
         Route::resource('user', AdminUserController::class);

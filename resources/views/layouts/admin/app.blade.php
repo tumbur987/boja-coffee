@@ -276,6 +276,103 @@
             });
         });
     </script>
+    <script>
+        var notifPollingInterval = null;
+
+        function loadNotifications() {
+            fetch('{{ url("/notifications") }}', { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var list = document.getElementById('notifList');
+                var badge = document.getElementById('notifBadge');
+
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                if (data.notifications.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:13px;"><i class="fas fa-bell-slash" style="font-size:24px; opacity:0.3; display:block; margin-bottom:8px;"></i>Belum ada notifikasi</div>';
+                    return;
+                }
+
+                var html = '';
+                data.notifications.forEach(function(n) {
+                    var readStyle = n.is_read ? 'opacity: 0.6;' : '';
+                    var unreadDot = n.is_read ? '' : '<span style="width:8px; height:8px; border-radius:50%; background:var(--danger); display:inline-block; margin-right:8px; flex-shrink:0;"></span>';
+                    var items = '';
+                    if (n.data && n.data.items) {
+                        items = '<div style="margin-top:6px; font-size:12px; color:var(--text-muted);">';
+                        n.data.items.forEach(function(item) {
+                            items += '<div>- ' + item.name + ' x' + item.quantity + '</div>';
+                        });
+                        items += '</div>';
+                    }
+                    var total = n.data && n.data.total_price ? '<div style="font-weight:700; color:var(--coffee); margin-top:4px; font-size:13px;">Rp' + new Intl.NumberFormat('id-ID').format(n.data.total_price) + '</div>' : '';
+
+                    html += '<div class="notif-item" data-id="' + n.id + '" onclick="markNotifRead(' + n.id + ')" style="padding:12px 16px; border-bottom:1px solid rgba(44,24,16,0.06); cursor:pointer; transition: background 0.15s; ' + readStyle + '" onmouseenter="this.style.background=\'var(--cream-lighter)\'" onmouseleave="this.style.background=\'transparent\'">' +
+                        '<div style="display:flex; align-items:flex-start;">' + unreadDot +
+                        '<div style="flex:1;">' +
+                            '<div style="font-weight:700; font-size:13px; color:var(--coffee-dark);">' + n.title + '</div>' +
+                            '<div style="font-size:12px; color:var(--text-muted); margin-top:2px;">' + n.message + '</div>' +
+                            items + total +
+                            '<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">' + new Date(n.created_at).toLocaleString('id-ID') + '</div>' +
+                        '</div>' +
+                        '</div>' +
+                    '</div>';
+                });
+                list.innerHTML = html;
+            });
+        }
+
+        function markNotifRead(id) {
+            fetch('{{ url("/notifications/read") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ ids: [id] })
+            }).then(function() {
+                loadNotifications();
+            });
+        }
+
+        function markAllRead() {
+            fetch('{{ url("/notifications/read") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({})
+            }).then(function() {
+                loadNotifications();
+            });
+        }
+
+        function checkUnreadCount() {
+            fetch('{{ url("/notifications/unread-count") }}', { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var badge = document.getElementById('notifBadge');
+                if (badge) {
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUnreadCount();
+            notifPollingInterval = setInterval(checkUnreadCount, 15000);
+
+            var notifDropdown = document.getElementById('notifDropdown');
+            if (notifDropdown) {
+                notifDropdown.addEventListener('show.bs.dropdown', function() { loadNotifications(); });
+            }
+        });
+    </script>
     @yield('scripts')
 </body>
 

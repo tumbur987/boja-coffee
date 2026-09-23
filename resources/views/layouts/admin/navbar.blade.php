@@ -8,6 +8,24 @@
     </ul>
 
     <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown" id="notifDropdown">
+            <a class="nav-link" href="#" data-toggle="dropdown" style="position: relative; padding: 6px 12px;" onclick="loadNotifications()">
+                <i class="fas fa-bell" style="font-size: 16px; color: var(--coffee-dark);"></i>
+                <span id="notifBadge" class="badge badge-danger" style="position: absolute; top: 2px; right: 4px; font-size: 10px; padding: 2px 5px; display: none;">0</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" style="width: 360px; max-height: 450px; overflow-y: auto; border: none; box-shadow: var(--shadow-lg); border-radius: var(--radius-sm); padding: 0;">
+                <div style="padding: 12px 16px; border-bottom: 1px solid rgba(44,24,16,0.06); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; color: var(--coffee-dark); font-size: 14px;">Notifikasi</span>
+                    <button id="markAllReadBtn" onclick="markAllRead()" style="background: none; border: none; color: var(--coffee); font-size: 12px; font-weight: 600; cursor: pointer;">Tandai semua sudah dibaca</button>
+                </div>
+                <div id="notifList">
+                    <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 13px;">
+                        <i class="fas fa-bell-slash" style="font-size: 24px; opacity: 0.3; display: block; margin-bottom: 8px;"></i>
+                        Memuat notifikasi...
+                    </div>
+                </div>
+            </div>
+        </li>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" href="#" style="padding: 6px 12px;">
                 <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--coffee); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 12px; margin-right: 8px;">

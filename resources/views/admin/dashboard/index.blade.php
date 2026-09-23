@@ -277,8 +277,8 @@
     const topProducts = {!! json_encode($topProducts->map(fn($tp) => ['name' => $tp->product->name ?? '-', 'qty' => $tp->total_qty])) !!};
     const visitorLabels = {!! json_encode($visitorLabels) !!};
     const visitorCounts = {!! json_encode($visitorCounts->toArray()) !!};
-    const rawDates = {!! json_encode($dailyTransactions->pluck('date')->toArray()) !!};
-    const rawVisitorDates = {!! json_encode($dailyVisitors->pluck('date')->toArray()) !!};
+    const rawDates = {!! json_encode($rawDates->toArray()) !!};
+    const rawVisitorDates = {!! json_encode($rawVisitorDates->toArray()) !!};
 
     const coffeeDark = '#2c1810';
     const coffee = '#4a2c2a';
