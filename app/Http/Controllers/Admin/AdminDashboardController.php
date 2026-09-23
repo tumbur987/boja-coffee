@@ -30,6 +30,7 @@ class AdminDashboardController extends Controller
         $chartLabels = $dailyTransactions->pluck('date')->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M'));
         $chartCounts = $dailyTransactions->pluck('total');
         $chartRevenue = $dailyTransactions->pluck('revenue');
+        $rawDates = $dailyTransactions->pluck('date');
 
         // Status transaksi
         $statusCounts = Transaction::select('status', DB::raw('COUNT(*) as total'))
@@ -68,6 +69,7 @@ class AdminDashboardController extends Controller
 
         $visitorLabels = $dailyVisitors->pluck('date')->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M'));
         $visitorCounts = $dailyVisitors->pluck('total');
+        $rawVisitorDates = $dailyVisitors->pluck('date');
 
         // Produk stok habis
         $outOfStockProducts = Product::where('stock', '<=', 0)->get();
@@ -76,10 +78,10 @@ class AdminDashboardController extends Controller
         $lowStockProducts = Product::where('stock', '>', 0)->where('stock', '<', 10)->get();
 
         return view('admin.dashboard.index', compact(
-            'chartLabels', 'chartCounts', 'chartRevenue',
+            'chartLabels', 'chartCounts', 'chartRevenue', 'rawDates',
             'statusCounts', 'topProducts',
             'todayRevenue', 'todayCount', 'monthRevenue',
-            'visitorLabels', 'visitorCounts',
+            'visitorLabels', 'visitorCounts', 'rawVisitorDates',
             'outOfStockProducts', 'lowStockProducts'
         ));
     }
