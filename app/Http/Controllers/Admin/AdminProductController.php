@@ -20,9 +20,7 @@ class AdminProductController extends Controller
 
     public function create()
     {
-        $categories = Category::orderBy('name')->get();
-
-        return view('admin.product.create', compact('categories'));
+        return redirect()->route('product.index');
     }
 
     public function store(Request $request)
@@ -58,9 +56,7 @@ class AdminProductController extends Controller
 
     public function edit(Product $product)
     {
-        $categories = Category::orderBy('name')->get();
-
-        return view('admin.product.edit', compact('product', 'categories'));
+        return redirect()->route('product.index');
     }
 
     public function update(Request $request, Product $product)
