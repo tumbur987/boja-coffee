@@ -323,10 +323,9 @@
         options: {
             responsive: true,
             interaction: { mode: 'index', intersect: false },
-            onClick: function(evt) {
-                var points = evt.getElementsAtEventForMode(evt.native, 'index', { intersect: false }, true);
-                if (points.length > 0) {
-                    var idx = points[0].index;
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    var idx = elements[0].index;
                     var date = rawDates[idx];
                     window.location.href = '{{ url("transaction") }}?date_from=' + date + '&date_to=' + date;
                 }
@@ -392,10 +391,9 @@
         options: {
             responsive: false,
             cutout: '65%',
-            onClick: function(evt) {
-                var points = evt.getElementsAtEventForMode(evt.native, 'nearest', { intersect: true }, true);
-                if (points.length > 0) {
-                    var idx = points[0].index;
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    var idx = elements[0].index;
                     var status = statusLabels[idx];
                     window.location.href = '{{ url("transaction") }}?status=' + status;
                 }
@@ -466,10 +464,9 @@
         },
         options: {
             responsive: true,
-            onClick: function(evt) {
-                var points = evt.getElementsAtEventForMode(evt.native, 'index', { intersect: false }, true);
-                if (points.length > 0) {
-                    var idx = points[0].index;
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    var idx = elements[0].index;
                     var date = rawVisitorDates[idx];
                     window.location.href = '{{ url("transaction") }}?date_from=' + date + '&date_to=' + date;
                 }
