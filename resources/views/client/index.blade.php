@@ -83,7 +83,8 @@
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
         .menu-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(44,24,16,0.04); transition: all 0.3s; border: 1px solid rgba(44,24,16,0.04); }
         .menu-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(44,24,16,0.08); }
-        .menu-card-img { height: 180px; background: linear-gradient(135deg, var(--cream-light), var(--cream)); display: flex; align-items: center; justify-content: center; font-size: 64px; }
+        .menu-card-img { height: 180px; background: linear-gradient(135deg, var(--cream-light), var(--cream)); display: flex; align-items: center; justify-content: center; font-size: 64px; position: relative; overflow: hidden; }
+        .menu-card-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
         .menu-card-body { padding: 20px; }
         .menu-card-cat { display: inline-block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--white); background: var(--coffee); padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
         .menu-card-body h3 { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 10px; line-height: 1.3; }
@@ -257,6 +258,7 @@
         });
 
         // Load menu from API
+        var storageUrl = '{{ asset('storage') }}';
         fetch('/api/menu')
         .then(r => r.json())
         .then(function(products) {
@@ -265,11 +267,15 @@
             products.slice(0, 6).forEach(function(p, i) {
                 var card = document.createElement('div');
                 card.className = 'menu-card';
+                var emoji = emojis[i % emojis.length];
+                var media = '<div class="menu-card-img">' + emoji +
+                    (p.image ? '<img src="' + storageUrl + '/' + p.image + '" alt="' + p.name + '" loading="lazy" onerror="this.remove()">' : '') +
+                    '</div>';
                 var stockBadge = p.stock > 0
                     ? '<span style="display:inline-block; font-size:11px; font-weight:600; color:#16a34a; margin-top:8px;"><i class="fas fa-check-circle"></i> Tersedia</span>'
                     : '<span style="display:inline-block; font-size:11px; font-weight:600; color:#dc2626; margin-top:8px;"><i class="fas fa-times-circle"></i> Habis</span>';
                 card.innerHTML =
-                    '<div class="menu-card-img">' + emojis[i % emojis.length] + '</div>' +
+                    media +
                     '<div class="menu-card-body">' +
                         '<div class="menu-card-cat">' + (p.category ? p.category.name : '') + '</div>' +
                         '<h3>' + p.name + '</h3>' +

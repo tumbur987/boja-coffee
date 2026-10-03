@@ -59,6 +59,9 @@
         .menu-stock { font-size: 11px; color: var(--text-light); font-weight: 500; margin-bottom: 4px; }
         .menu-left { flex: 1; min-width: 0; }
         .menu-emoji { font-size: 24px; margin-bottom: 4px; }
+        .menu-thumb { position: relative; width: 56px; height: 56px; border-radius: 12px; background: var(--cream-light); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; margin-bottom: 6px; }
+        .menu-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .menu-thumb .menu-emoji { margin-bottom: 0; }
         .menu-name { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
         .menu-cat { font-size: 11px; color: var(--text-light); font-weight: 500; margin-bottom: 6px; }
         .menu-price { font-size: 16px; font-weight: 800; color: var(--coffee); }
@@ -300,6 +303,7 @@
          data-table-id="{{ $table->id }}"
          data-table-code="{{ $table->code }}"
          data-csrf="{{ csrf_token() }}"
+         data-storage="{{ asset('storage') }}"
          data-client-key="{{ config('midtrans.client_key') }}"
          style="display:none;"></div>
     <script src="{{ asset('js/order.js') }}?v={{ time() }}"></script>

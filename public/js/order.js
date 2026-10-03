@@ -3,6 +3,7 @@
     var tableId = parseInt(meta.dataset.tableId);
     var tableCode = meta.dataset.tableCode;
     var csrfToken = meta.dataset.csrf;
+    var storageUrl = (meta.dataset.storage || '/storage').replace(/\/$/, '');
 
     var cart = {};
     var allProducts = [];
@@ -114,7 +115,10 @@
 
             card.innerHTML =
                 '<div class="menu-left">' +
-                    '<div class="menu-emoji">' + emojis[i % emojis.length] + '</div>' +
+                    '<div class="menu-thumb">' +
+                        '<span class="menu-emoji">' + emojis[i % emojis.length] + '</span>' +
+                        (p.image ? '<img src="' + storageUrl + '/' + p.image + '" alt="" loading="lazy" onerror="this.remove()">' : '') +
+                    '</div>' +
                     '<div class="menu-name">' + p.name + '</div>' +
                     '<div class="menu-cat">' + (p.category ? p.category.name : '') + '</div>' +
                     stockInfo +
