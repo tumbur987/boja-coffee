@@ -64,6 +64,7 @@
         .menu-thumb .menu-emoji { margin-bottom: 0; }
         .menu-name { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
         .menu-cat { font-size: 11px; color: var(--text-light); font-weight: 500; margin-bottom: 6px; }
+        .menu-desc { font-size: 12px; line-height: 1.5; color: var(--text-light); margin-bottom: 6px; }
         .menu-price { font-size: 16px; font-weight: 800; color: var(--coffee); }
         .menu-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 

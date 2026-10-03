@@ -42,7 +42,8 @@
                                 data-name="{{ $product->name }}"
                                 data-stock="{{ $product->stock }}"
                                 data-price="{{ $product->price }}"
-                                data-image="{{ $product->image ? asset('storage/' . $product->image) : '' }}">
+                                data-image="{{ $product->image ? asset('storage/' . $product->image) : '' }}"
+                                data-description="{{ $product->description }}">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <form action="{{ route('product.destroy', $product) }}" method="POST" class="d-inline delete-form">
@@ -115,9 +116,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group mb-0">
+                        <div class="form-group">
                             <label>Gambar</label>
                             <input type="file" class="form-control" name="image" accept="image/*">
+                        </div>
+                        <div class="form-group mb-0">
+                            <label>Deskripsi <small class="text-muted">(Maks. 500 karakter)</small></label>
+                            <textarea class="form-control" name="description" rows="3" maxlength="500" placeholder="Contoh: Es kopi susu gula aren dengan susu segar dan es batu pilihan."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -174,12 +179,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group mb-0">
+                        <div class="form-group">
                             <label>Gambar <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
                             <input type="file" class="form-control" name="image" accept="image/*">
                             <div id="edit-image-preview" class="mt-2" style="display:none;">
                                 <img id="edit-image-img" src="" alt="" width="80" height="80" style="border-radius:8px; object-fit:cover;">
                             </div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label>Deskripsi <small class="text-muted">(Maks. 500 karakter)</small></label>
+                            <textarea class="form-control" id="edit-description" name="description" rows="3" maxlength="500" placeholder="Contoh: Es kopi susu gula aren dengan susu segar dan es batu pilihan."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -200,6 +209,7 @@
             document.getElementById('edit-name').value = this.dataset.name;
             document.getElementById('edit-stock').value = this.dataset.stock;
             document.getElementById('edit-price').value = this.dataset.price;
+            document.getElementById('edit-description').value = this.dataset.description || '';
             var preview = document.getElementById('edit-image-preview');
             var img = document.getElementById('edit-image-img');
             if (this.dataset.image) { img.src = this.dataset.image; preview.style.display = 'block'; }

@@ -88,6 +88,12 @@
         renderMenu(getFilteredProducts());
     }
 
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
     function renderMenu(products) {
         var container = document.getElementById('menuList');
         if (products.length === 0) {
@@ -112,6 +118,7 @@
 
             var badgeHtml = outOfStock ? '<div class="habis-badge">HABIS</div>' : '';
             var stockInfo = !outOfStock ? '<div class="menu-stock">Stok: ' + p.stock + '</div>' : '';
+            var descInfo = p.description ? '<div class="menu-desc">' + escapeHtml(p.description) + '</div>' : '';
 
             card.innerHTML =
                 '<div class="menu-left">' +
@@ -121,6 +128,7 @@
                     '</div>' +
                     '<div class="menu-name">' + p.name + '</div>' +
                     '<div class="menu-cat">' + (p.category ? p.category.name : '') + '</div>' +
+                    descInfo +
                     stockInfo +
                     '<div class="menu-price">Rp' + new Intl.NumberFormat('id-ID').format(p.price) + '</div>' +
                 '</div>' +

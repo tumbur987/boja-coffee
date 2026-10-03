@@ -33,6 +33,7 @@ class AdminProductController extends Controller
             'stock' => 'required|integer|min:0',
             'price' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'description' => 'nullable|string|max:500',
         ], [
             'name.unique' => 'Nama produk sudah ada. Silakan gunakan nama lain.',
         ]);
@@ -70,6 +71,7 @@ class AdminProductController extends Controller
             'stock' => 'required|integer|min:0',
             'price' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'description' => 'nullable|string|max:500',
         ], [
             'name.unique' => 'Nama produk sudah ada. Silakan gunakan nama lain.',
         ]);
