@@ -34,6 +34,7 @@ class AdminDashboardController extends Controller
 
         // Status transaksi
         $statusCounts = Transaction::select('status', DB::raw('COUNT(*) as total'))
+            ->whereNotIn('status', ['paid'])
             ->groupBy('status')
             ->pluck('total', 'status');
 
