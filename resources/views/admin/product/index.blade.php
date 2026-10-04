@@ -8,6 +8,37 @@
             <button class="btn btn-primary" data-toggle="modal" data-target="#createModal"><i class="fas fa-plus"></i> Tambah Produk</button>
         </div>
         <div class="card-body">
+            <form method="GET" action="{{ route('product.index') }}" class="mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" name="search" class="form-control" placeholder="Cari nama produk..." value="{{ $search ?? '' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="category" class="form-control form-control-sm" onchange="this.form.submit()">
+                            <option value="">Semua Kategori</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ ($categoryId ?? null) == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm btn-primary btn-block"><i class="fas fa-filter mr-1"></i> Filter</button>
+                    </div>
+                    @if (($categoryId ?? null) || ($search ?? ''))
+                    <div class="col-md-2">
+                        <a href="{{ route('product.index') }}" class="btn btn-sm btn-outline-secondary btn-block"><i class="fas fa-times mr-1"></i> Reset</a>
+                    </div>
+                    @endif
+                </div>
+            </form>
+
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
@@ -57,7 +88,7 @@
                     <tr>
                         <td colspan="7" class="text-center" style="padding:30px; color:var(--text-muted);">
                             <i class="fas fa-inbox" style="font-size:32px; opacity:0.3; display:block; margin-bottom:8px;"></i>
-                            Belum ada produk
+                            {{ (($categoryId ?? null) || ($search ?? '')) ? 'Tidak ada produk yang cocok dengan filter' : 'Belum ada produk' }}
                         </td>
                     </tr>
                     @endforelse
