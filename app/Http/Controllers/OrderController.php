@@ -10,6 +10,13 @@ class OrderController extends Controller
     {
         $table = Table::where('code', $code)->firstOrFail();
 
+        return view('client.welcome', compact('table'));
+    }
+
+    public function menu($code)
+    {
+        $table = Table::where('code', $code)->firstOrFail();
+
         return view('client.order', compact('table'));
     }
 }

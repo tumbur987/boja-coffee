@@ -221,7 +221,7 @@
 
     <div class="header">
         <div class="header-top">
-            <a href="/" class="brand">
+            <a href="{{ route('order.index', $table->code) }}" class="brand">
                 @if(!empty(Setting::get('site_logo')))
                     <img src="{{ asset('storage/' . Setting::get('site_logo')) }}" alt="Logo" style="height: 28px; border-radius: 6px;">
                 @else

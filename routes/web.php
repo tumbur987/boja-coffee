@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
 
 // Client order page (no auth)
 Route::get('/order/{code}', [OrderController::class, 'index'])->name('order.index');
+Route::get('/order/{code}/menu', [OrderController::class, 'menu'])->name('order.menu');
 
 // API for client menu
 Route::get('/api/menu', function () {
