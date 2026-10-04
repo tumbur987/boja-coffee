@@ -485,6 +485,108 @@
         document.getElementById('readyTitle').textContent = 'Pesanan Siap!';
         document.getElementById('readyDesc').textContent = 'Pesanan Anda sudah selesai. Silakan ambil di meja Anda.';
         document.getElementById('readyNotification').classList.add('show');
+        loadExistingFeedback();
+    }
+
+    var selectedRating = 0;
+    var ratingLabels = { 1: 'Sangat kurang', 2: 'Kurang', 3: 'Cukup', 4: 'Bagus', 5: 'Sangat puas!' };
+
+    function setStarVisual() {
+        document.querySelectorAll('#starRating .star-btn').forEach(function(btn) {
+            btn.classList.toggle('active', parseInt(btn.dataset.value, 10) <= selectedRating);
+        });
+    }
+
+    function showFeedbackForm() {
+        selectedRating = 0;
+        setStarVisual();
+        document.getElementById('feedbackBlock').style.display = 'block';
+        document.getElementById('feedbackDone').style.display = 'none';
+        document.getElementById('feedbackHint').textContent = 'Ketuk bintang untuk menilai';
+        document.getElementById('feedbackSubmitBtn').disabled = true;
+        document.getElementById('feedbackComment').value = '';
+    }
+
+    function showFeedbackDone(rating, isExisting) {
+        var stars = '';
+        for (var i = 1; i <= 5; i++) stars += (i <= rating ? '&#9733;' : '&#9734;');
+        document.getElementById('doneStars').innerHTML = stars;
+        document.getElementById('feedbackDoneText').textContent = isExisting
+            ? 'Anda sudah menilai pesanan ini. Terima kasih!'
+            : 'Terima kasih atas penilaian Anda!';
+        document.getElementById('feedbackBlock').style.display = 'none';
+        document.getElementById('feedbackDone').style.display = 'block';
+    }
+
+    function loadExistingFeedback() {
+        if (!pendingOrderId) { showFeedbackForm(); return; }
+        fetch('/api/order-status/' + pendingOrderId)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.feedback) showFeedbackDone(data.feedback.rating, true);
+            else showFeedbackForm();
+        })
+        .catch(function() { showFeedbackForm(); });
+    }
+
+    function submitFeedback() {
+        if (!selectedRating || !pendingOrderId) return;
+        var btn = document.getElementById('feedbackSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+        var comment = document.getElementById('feedbackComment').value.trim();
+
+        fetch('/api/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify({ order_id: pendingOrderId, rating: selectedRating, comment: comment })
+        })
+        .then(function(r) {
+            return r.json().then(function(d) { return { ok: r.ok, data: d }; });
+        })
+        .then(function(result) {
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Penilaian';
+            if (result.ok && result.data.success) {
+                showFeedbackDone(selectedRating, false);
+                refreshHistory();
+            } else {
+                btn.disabled = false;
+                showToast((result.data && result.data.message) || 'Gagal mengirim penilaian.', '&#9888;', 'Gagal Mengirim');
+            }
+        })
+        .catch(function() {
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Penilaian';
+            btn.disabled = false;
+            showToast('Gagal mengirim penilaian. Periksa koneksi internet Anda.', '&#127760;', 'Koneksi Gagal');
+        });
+    }
+
+    function initFeedback() {
+        var stars = document.querySelectorAll('#starRating .star-btn');
+        stars.forEach(function(star) {
+            var value = parseInt(star.dataset.value, 10);
+            star.addEventListener('mouseenter', function() {
+                stars.forEach(function(s) { s.classList.toggle('hover', parseInt(s.dataset.value, 10) <= value); });
+                document.getElementById('feedbackHint').textContent = ratingLabels[value];
+            });
+            star.addEventListener('mouseleave', function() {
+                stars.forEach(function(s) { s.classList.remove('hover'); });
+                document.getElementById('feedbackHint').textContent = selectedRating
+                    ? ratingLabels[selectedRating]
+                    : 'Ketuk bintang untuk menilai';
+            });
+            star.addEventListener('click', function() {
+                selectedRating = value;
+                setStarVisual();
+                document.getElementById('feedbackHint').textContent = ratingLabels[value];
+                document.getElementById('feedbackSubmitBtn').disabled = false;
+            });
+        });
+
+        document.getElementById('feedbackSubmitBtn').addEventListener('click', submitFeedback);
+        document.getElementById('feedbackSkipBtn').addEventListener('click', function() {
+            document.getElementById('readyNotification').classList.remove('show');
+        });
     }
 
     window.switchView = function(view) {
@@ -529,11 +631,19 @@
             t.items.forEach(function(it) {
                 items += '<div class="history-item"><span class="history-item-name">' + it.name + '</span><span class="history-item-qty">' + it.quantity + ' x Rp' + new Intl.NumberFormat('id-ID').format(it.price) + '</span></div>';
             });
+            var ratingHtml = '';
+            if (t.rating) {
+                ratingHtml = '<div class="history-rating">';
+                for (var r = 1; r <= 5; r++) {
+                    ratingHtml += '<span style="color:' + (r <= t.rating ? '#f59e0b' : '#e2d8cb') + ';">&#9733;</span>';
+                }
+                ratingHtml += '<span style="color:var(--text-light); font-size:12px; font-weight:600;">Penilaian Anda</span></div>';
+            }
             html += '<div class="history-card">' +
                 '<div class="history-header"><div><div class="history-order-id">Pesanan #' + t.id + '</div><div class="history-date">' + t.created_at + '</div></div>' +
                 '<span class="history-status ' + t.status + '">' + sIcon + ' ' + sLabel + '</span></div>' +
                 '<div class="history-items">' + items + '</div>' +
-                '<div class="history-total"><span>Total</span><span>Rp' + new Intl.NumberFormat('id-ID').format(t.total_price) + '</span></div></div>';
+                '<div class="history-total"><span>Total</span><span>Rp' + new Intl.NumberFormat('id-ID').format(t.total_price) + '</span></div>' + ratingHtml + '</div>';
         });
         container.innerHTML = html;
     }
@@ -545,5 +655,6 @@
         document.getElementById('drawerCloseBtn').addEventListener('click', closeDrawer);
         document.getElementById('drawerClearBtn').addEventListener('click', clearCart);
         document.getElementById('drawerCheckoutBtn').addEventListener('click', function() { closeDrawer(); submitOrder(); });
+        initFeedback();
     });
 })();

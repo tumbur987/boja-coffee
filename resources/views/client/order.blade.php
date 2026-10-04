@@ -138,14 +138,31 @@
         .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cart-btn-wrapper { position: relative; }
 
-        .ready-notification { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,14,10,0.92); display: none; align-items: center; justify-content: center; z-index: 300; }
+        .ready-notification { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,14,10,0.92); display: none; align-items: center; justify-content: center; z-index: 300; padding: 16px; }
         .ready-notification.show { display: flex; }
-        .ready-box { background: var(--white); border-radius: 24px; padding: 48px 36px; text-align: center; max-width: 360px; width: 90%; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .ready-box { background: var(--white); border-radius: 24px; padding: 40px 32px; text-align: center; max-width: 360px; width: 100%; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 92vh; overflow-y: auto; }
         .ready-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(34,197,94,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; animation: bounce 0.6s ease; }
         @keyframes bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
         .ready-box h2 { font-size: 22px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
         .ready-box p { font-size: 14px; color: var(--text-light); line-height: 1.6; margin-bottom: 24px; }
         .ready-btn { background: var(--coffee); color: white; border: none; padding: 12px 32px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; }
+
+        .feedback-block { border-top: 1px solid rgba(44,24,16,0.08); margin-top: 20px; padding-top: 20px; text-align: center; }
+        .feedback-title { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
+        .feedback-subtitle { font-size: 12px; color: var(--text-light); margin-bottom: 14px; }
+        .star-rating { display: flex; justify-content: center; gap: 4px; margin-bottom: 8px; }
+        .star-btn { background: none; border: none; font-size: 34px; line-height: 1; color: #e2d8cb; cursor: pointer; padding: 2px; transition: transform 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
+        .star-btn.hover, .star-btn.active { color: #f59e0b; }
+        .star-btn.hover { transform: scale(1.18); }
+        .feedback-hint { font-size: 13px; font-weight: 600; color: var(--coffee); min-height: 20px; margin-bottom: 12px; }
+        .feedback-comment { width: 100%; border: 2px solid rgba(74,44,42,0.12); border-radius: 10px; padding: 10px 12px; font-size: 13px; font-family: inherit; color: var(--dark); resize: none; outline: none; margin-bottom: 12px; transition: border-color 0.2s; }
+        .feedback-comment:focus { border-color: var(--coffee); }
+        .feedback-comment::placeholder { color: var(--text-light); }
+        .feedback-skip { background: none; border: none; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px; padding: 6px 12px; }
+        .feedback-done { border-top: 1px solid rgba(44,24,16,0.08); margin-top: 20px; padding-top: 20px; }
+        .feedback-done .done-stars { font-size: 30px; color: #f59e0b; letter-spacing: 5px; margin-bottom: 8px; }
+        .feedback-done p { font-size: 14px; color: var(--text-light); margin-bottom: 0; }
+        .history-rating { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: #f59e0b; }
 
         .view-toggle { display: flex; gap: 8px; padding: 0 16px 12px; }
         .view-toggle-btn { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid rgba(74,44,42,0.12); background: var(--white); color: var(--text-light); font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
@@ -294,8 +311,29 @@
             <h2 id="readyTitle">Pesanan Siap!</h2>
             <p id="readyDesc">Pesanan Anda sudah selesai diproses. Silakan ambil di meja Anda.</p>
             <div class="table-code">Meja {{ $table->number }}</div>
-            <br>
-            <button class="ready-btn" id="readyHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px;" onclick="document.getElementById('readyNotification').classList.remove('show'); switchView('history');"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
+
+            <div class="feedback-block" id="feedbackBlock">
+                <div class="feedback-title">Bagaimana kepuasan pelayanan kami?</div>
+                <div class="feedback-subtitle">Beri penilaian 1 sampai 5 bintang</div>
+                <div class="star-rating" id="starRating">
+                    <button type="button" class="star-btn" data-value="1" title="1 bintang">&#9733;</button>
+                    <button type="button" class="star-btn" data-value="2" title="2 bintang">&#9733;</button>
+                    <button type="button" class="star-btn" data-value="3" title="3 bintang">&#9733;</button>
+                    <button type="button" class="star-btn" data-value="4" title="4 bintang">&#9733;</button>
+                    <button type="button" class="star-btn" data-value="5" title="5 bintang">&#9733;</button>
+                </div>
+                <div class="feedback-hint" id="feedbackHint">Ketuk bintang untuk menilai</div>
+                <textarea id="feedbackComment" class="feedback-comment" rows="2" maxlength="500" placeholder="Komentar Anda (opsional)"></textarea>
+                <button type="button" class="ready-btn" id="feedbackSubmitBtn" disabled><i class="fas fa-paper-plane"></i> Kirim Penilaian</button>
+                <button type="button" class="feedback-skip" id="feedbackSkipBtn">Lewati</button>
+            </div>
+
+            <div class="feedback-done" id="feedbackDone" style="display:none;">
+                <div class="done-stars" id="doneStars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p id="feedbackDoneText">Terima kasih atas penilaian Anda!</p>
+            </div>
+
+            <button class="ready-btn" id="readyHistoryBtn" style="background:var(--cream); color:var(--dark); margin-bottom:8px; margin-top:20px;" onclick="document.getElementById('readyNotification').classList.remove('show'); switchView('history');"><i class="fas fa-history"></i> Lihat Riwayat Pesanan</button>
             <button class="ready-btn" id="readyBtn" onclick="document.getElementById('readyNotification').classList.remove('show');">OK</button>
         </div>
     </div>

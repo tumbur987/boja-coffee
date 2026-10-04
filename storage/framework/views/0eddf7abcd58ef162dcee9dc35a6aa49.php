@@ -62,6 +62,15 @@
                     </a>
                 </li>
 
+                <li class="nav-header" style="margin-top: 12px;">LAPORAN</li>
+
+                <li class="nav-item">
+                    <a href="<?php echo e(route('feedback.index')); ?>" class="nav-link <?php echo e(request()->routeIs('feedback.*') ? 'active' : ''); ?>">
+                        <i class="nav-icon fas fa-star"></i>
+                        <p>Feedback Pelanggan</p>
+                    </a>
+                </li>
+
                 <li class="nav-header" style="margin-top: 12px;">PENGATURAN</li>
 
                 <li class="nav-item">

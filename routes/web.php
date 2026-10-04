@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminTableController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\OrderController;
@@ -35,6 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('transaction', AdminTransactionController::class);
     Route::post('transaction/{transaction}/selesai', [AdminTransactionController::class, 'markSelesai'])->name('transaction.selesai');
 
+    Route::get('feedback', [AdminFeedbackController::class, 'index'])->name('feedback.index');
+
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
@@ -60,18 +64,27 @@ Route::get('/api/menu', function () {
 
 // API for client order status check
 Route::get('/api/order-status/{orderId}', function ($orderId) {
-    $transaction = Transaction::where('order_id', $orderId)->first();
+    $transaction = Transaction::with('feedback')->where('order_id', $orderId)->first();
     if (! $transaction) {
         return response()->json(['status' => 'not_found'], 404);
     }
 
-    return response()->json(['status' => $transaction->status]);
+    return response()->json([
+        'status' => $transaction->status,
+        'feedback' => $transaction->feedback ? [
+            'rating' => $transaction->feedback->rating,
+            'comment' => $transaction->feedback->comment,
+        ] : null,
+    ]);
 });
+
+// API for customer feedback (5 star rating)
+Route::post('/api/feedback', [FeedbackController::class, 'store']);
 
 // API for client order history
 Route::get('/api/order-history/{tableId}', function ($tableId) {
     $customerName = request('customer_name');
-    $query = Transaction::with(['items.product', 'table'])
+    $query = Transaction::with(['items.product', 'table', 'feedback'])
         ->where('table_id', $tableId)
         ->latest();
 
@@ -87,6 +100,7 @@ Route::get('/api/order-history/{tableId}', function ($tableId) {
             'total_price' => $t->total_price,
             'status' => $t->status,
             'created_at' => $t->created_at->format('d M Y, H:i'),
+            'rating' => $t->feedback?->rating,
             'items' => $t->items->map(function ($item) {
                 return [
                     'name' => $item->product->name ?? '-',

@@ -61,6 +61,15 @@
                     </a>
                 </li>
 
+                <li class="nav-header" style="margin-top: 12px;">LAPORAN</li>
+
+                <li class="nav-item">
+                    <a href="{{ route('feedback.index') }}" class="nav-link {{ request()->routeIs('feedback.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-star"></i>
+                        <p>Feedback Pelanggan</p>
+                    </a>
+                </li>
+
                 <li class="nav-header" style="margin-top: 12px;">PENGATURAN</li>
 
                 <li class="nav-item">
