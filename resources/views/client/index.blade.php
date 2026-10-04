@@ -133,7 +133,6 @@
             <div class="nav-links">
                 <a href="#menu">Menu</a>
                 <a href="#tentang">Tentang</a>
-                <a href="#fitur">Fitur</a>
                 <a href="#kontak">Kontak</a>
                 <a href="/login" class="nav-cta">Masuk Admin</a>
             </div>
@@ -151,7 +150,7 @@
                 <h1>{!! Setting::get('hero_title', 'Nikmati Setiap Tegukan <em>Kopi Terbaik</em>') !!}</h1>
                 <p>{{ Setting::get('hero_subtitle', 'SiBoja Coffee menyajikan kopi premium dengan biji pilihan. Pesan langsung dari meja Anda, scan QR, pilih menu, dan bayar dengan mudah.') }}</p>
                 <div class="hero-buttons">
-                    <a href="#menu" class="btn-primary">
+                    <a href="{{ route('order.menu', \App\Models\Table::first()->code ?? 'MJA001') }}" class="btn-primary">
                         <i class="fas fa-coffee"></i> Lihat Menu
                     </a>
                     <a href="#tentang" class="btn-outline">
@@ -214,8 +213,8 @@
         </div>
         <div class="menu-grid" id="menuGrid"></div>
         <div style="text-align:center; margin-top:40px;">
-            <a href="/order/{{ \App\Models\Table::first()->code ?? 'MJA001' }}" class="btn-primary" style="font-size:16px; padding:16px 40px;">
-                <i class="fas fa-qrcode"></i> Scan QR & Pesan Sekarang
+            <a href="{{ route('order.menu', \App\Models\Table::first()->code ?? 'MJA001') }}" class="btn-primary" style="font-size:16px; padding:16px 40px;">
+                <i class="fas fa-mug-hot"></i> Pesan Sekarang
             </a>
         </div>
     </section>
@@ -225,9 +224,6 @@
         <div class="container">
             <h2>{{ Setting::get('cta_title', 'Siap Menikmati Kopi Terbaik?') }}</h2>
             <p>{{ Setting::get('cta_description', 'Temukan SiBoja Coffee terdekat atau pesan langsung dari meja Anda melalui scan QR code.') }}</p>
-            <a href="#menu" class="btn-primary" style="font-size:16px; padding:16px 40px;">
-                <i class="fas fa-coffee"></i> Mulai Pesan
-            </a>
         </div>
     </section>
 
