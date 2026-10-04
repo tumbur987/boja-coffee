@@ -101,6 +101,7 @@ Route::get('/api/order-history/{tableId}', function ($tableId) {
             'status' => $t->status,
             'created_at' => $t->created_at->format('d M Y, H:i'),
             'rating' => $t->feedback?->rating,
+            'comment' => $t->feedback?->comment,
             'items' => $t->items->map(function ($item) {
                 return [
                     'name' => $item->product->name ?? '-',

@@ -169,7 +169,10 @@
         .view-toggle-btn.active { background: var(--coffee); color: white; border-color: var(--coffee); box-shadow: 0 4px 12px rgba(74,44,42,0.2); }
 
         .history-list { padding: 4px 16px; }
-        .history-card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); border: 1px solid rgba(44,24,16,0.04); }
+        .history-card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); border: 1px solid rgba(44,24,16,0.04); cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; }
+        .history-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+        .history-card:active { transform: scale(0.99); }
+        .history-hint { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-light); margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(44,24,16,0.1); }
         .history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .history-order-id { font-size: 12px; color: var(--text-light); font-weight: 600; }
         .history-date { font-size: 11px; color: var(--text-light); }
@@ -185,6 +188,33 @@
         .history-total { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(44,24,16,0.06); font-weight: 800; color: var(--dark); }
         .history-empty { text-align: center; padding: 60px 20px; color: var(--text-light); }
         .history-empty i { font-size: 48px; opacity: 0.2; display: block; margin-bottom: 12px; }
+
+        .sheet-overlay { position: fixed; inset: 0; background: rgba(26,14,10,0.6); opacity: 0; visibility: hidden; transition: opacity 0.25s; z-index: 400; }
+        .sheet-overlay.show { opacity: 1; visibility: visible; }
+        .detail-sheet { position: fixed; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; background: var(--white); border-radius: 24px 24px 0 0; z-index: 410; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.3,0.64,1); max-height: 88vh; overflow-y: auto; padding: 12px 20px 24px; }
+        .detail-sheet.show { transform: translateY(0); }
+        .sheet-handle { width: 44px; height: 5px; border-radius: 10px; background: rgba(44,24,16,0.15); margin: 0 auto 16px; }
+        .sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+        .sheet-title { font-size: 17px; font-weight: 800; color: var(--dark); }
+        .sheet-date { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+        .sheet-close { background: var(--cream-lighter); border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; color: var(--coffee); cursor: pointer; flex-shrink: 0; }
+        .sheet-status { display: flex; align-items: center; gap: 12px; background: var(--cream-lighter); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+        .sheet-status-icon { font-size: 22px; width: 40px; height: 40px; border-radius: 50%; background: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .sheet-status-label { font-size: 14px; font-weight: 800; color: var(--dark); }
+        .sheet-status-desc { font-size: 12px; color: var(--text-light); line-height: 1.5; margin-top: 2px; }
+        .sheet-section { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .sheet-item { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(44,24,16,0.06); }
+        .sheet-item-name { font-size: 14px; font-weight: 700; color: var(--dark); }
+        .sheet-item-qty { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+        .sheet-item-sub { font-size: 14px; font-weight: 700; color: var(--coffee); white-space: nowrap; }
+        .sheet-info-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 6px 0; color: var(--text-light); }
+        .sheet-info-row span:last-child { font-weight: 700; color: var(--dark); }
+        .sheet-total { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 14px; border-top: 2px solid rgba(44,24,16,0.08); font-weight: 800; font-size: 17px; color: var(--dark); }
+        .sheet-rating { margin-top: 16px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.18); border-radius: 14px; padding: 14px 16px; }
+        .sheet-rating-stars { font-size: 22px; color: #f59e0b; letter-spacing: 4px; line-height: 1; }
+        .sheet-rating-stars .off { color: #e2d8cb; }
+        .sheet-rating-comment { font-size: 13px; color: var(--text); margin-top: 8px; line-height: 1.5; }
+        .sheet-rating-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -235,6 +265,42 @@
                 <p style="font-size:13px; color:var(--text-light);">Memuat riwayat...</p>
             </div>
         </div>
+    </div>
+
+    <div class="sheet-overlay" id="historyDetailOverlay"></div>
+    <div class="detail-sheet" id="historyDetail" role="dialog" aria-modal="true">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <div>
+                <div class="sheet-title" id="hdTitle">Detail Pesanan</div>
+                <div class="sheet-date" id="hdDate"></div>
+            </div>
+            <button type="button" class="sheet-close" id="hdCloseBtn" aria-label="Tutup">&times;</button>
+        </div>
+
+        <div class="sheet-status">
+            <div class="sheet-status-icon" id="hdStatusIcon">&#9203;</div>
+            <div>
+                <div class="sheet-status-label" id="hdStatusLabel">Status</div>
+                <div class="sheet-status-desc" id="hdStatusDesc"></div>
+            </div>
+        </div>
+
+        <div class="sheet-section">Pesanan Anda</div>
+        <div id="hdItems"></div>
+
+        <div class="sheet-info-row"><span>Nama Pemesan</span><span id="hdCustomer">-</span></div>
+        <div class="sheet-info-row"><span>Jumlah Item</span><span id="hdQty">-</span></div>
+
+        <div class="sheet-total"><span>Total</span><span id="hdTotal">Rp0</span></div>
+
+        <div class="sheet-rating" id="hdRatingBox" style="display:none;">
+            <div class="sheet-rating-label">Penilaian Anda</div>
+            <div class="sheet-rating-stars" id="hdStars"></div>
+            <div class="sheet-rating-comment" id="hdComment" style="display:none;"></div>
+        </div>
+
+        <button type="button" class="ready-btn" id="hdCloseBtn2" style="margin-top:18px;">Tutup</button>
     </div>
 
     <div class="cart-bar" id="cartBar">

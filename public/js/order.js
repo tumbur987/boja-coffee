@@ -614,19 +614,28 @@
         .catch(function() { container.innerHTML = '<div class="history-empty"><i class="fas fa-exclamation-triangle"></i><p>Gagal memuat riwayat</p></div>'; });
     }
 
+    var historyListData = [];
+    var statusMeta = {
+        pending: { label: 'Menunggu Pembayaran', icon: '&#9203;', desc: 'Selesaikan pembayaran agar pesanan diproses.' },
+        lunas: { label: 'Lunas', icon: '&#9989;', desc: 'Pembayaran diterima. Pesanan sedang diproses oleh barista.' },
+        selesai: { label: 'Selesai', icon: '&#127861;', desc: 'Pesanan selesai dan siap diambil di meja Anda.' },
+        cancelled: { label: 'Dibatalkan', icon: '&#10060;', desc: 'Pesanan ini dibatalkan dan tidak diproses.' }
+    };
+
+    function getStatusMeta(status) {
+        return statusMeta[status] || { label: 'Menunggu', icon: '&#9203;', desc: 'Status pesanan belum diperbarui.' };
+    }
+
     function renderHistory(list) {
+        historyListData = list || [];
         var container = document.getElementById('historyList');
-        if (!list || list.length === 0) {
+        if (historyListData.length === 0) {
             container.innerHTML = '<div class="history-empty"><i class="fas fa-receipt"></i><p>Belum ada riwayat pesanan</p></div>';
             return;
         }
         var html = '';
-        list.forEach(function(t) {
-            var sLabel = '', sIcon = '';
-            if (t.status === 'lunas') { sLabel = 'Lunas'; sIcon = '&#9989;'; }
-            else if (t.status === 'selesai') { sLabel = 'Selesai'; sIcon = '&#9989;'; }
-            else if (t.status === 'cancelled') { sLabel = 'Dibatalkan'; sIcon = '&#10060;'; }
-            else { sLabel = 'Menunggu'; sIcon = '&#9203;'; }
+        historyListData.forEach(function(t, index) {
+            var meta = getStatusMeta(t.status);
             var items = '';
             t.items.forEach(function(it) {
                 items += '<div class="history-item"><span class="history-item-name">' + it.name + '</span><span class="history-item-qty">' + it.quantity + ' x Rp' + new Intl.NumberFormat('id-ID').format(it.price) + '</span></div>';
@@ -639,13 +648,70 @@
                 }
                 ratingHtml += '<span style="color:var(--text-light); font-size:12px; font-weight:600;">Penilaian Anda</span></div>';
             }
-            html += '<div class="history-card">' +
+            html += '<div class="history-card" onclick="showHistoryDetail(' + index + ')">' +
                 '<div class="history-header"><div><div class="history-order-id">Pesanan #' + t.id + '</div><div class="history-date">' + t.created_at + '</div></div>' +
-                '<span class="history-status ' + t.status + '">' + sIcon + ' ' + sLabel + '</span></div>' +
+                '<span class="history-status ' + t.status + '">' + meta.icon + ' ' + meta.label + '</span></div>' +
                 '<div class="history-items">' + items + '</div>' +
-                '<div class="history-total"><span>Total</span><span>Rp' + new Intl.NumberFormat('id-ID').format(t.total_price) + '</span></div>' + ratingHtml + '</div>';
+                '<div class="history-total"><span>Total</span><span>Rp' + new Intl.NumberFormat('id-ID').format(t.total_price) + '</span></div>' + ratingHtml +
+                '<div class="history-hint"><i class="fas fa-chevron-right" style="font-size:10px;"></i> Ketuk untuk lihat detail</div></div>';
         });
         container.innerHTML = html;
+    }
+
+    window.showHistoryDetail = function(index) {
+        var t = historyListData[index];
+        if (!t) return;
+        var meta = getStatusMeta(t.status);
+
+        document.getElementById('hdTitle').textContent = 'Pesanan #' + t.id;
+        document.getElementById('hdDate').innerHTML = t.created_at + (t.order_id ? ' &bull; ' + escapeHtml(t.order_id) : '');
+        document.getElementById('hdStatusIcon').innerHTML = meta.icon;
+        document.getElementById('hdStatusLabel').textContent = meta.label;
+        document.getElementById('hdStatusDesc').textContent = meta.desc;
+
+        var itemsHtml = '';
+        var totalQty = 0;
+        t.items.forEach(function(it) {
+            totalQty += it.quantity;
+            itemsHtml += '<div class="sheet-item">' +
+                '<div><div class="sheet-item-name">' + escapeHtml(it.name) + '</div>' +
+                '<div class="sheet-item-qty">' + it.quantity + ' x Rp' + new Intl.NumberFormat('id-ID').format(it.price) + '</div></div>' +
+                '<div class="sheet-item-sub">Rp' + new Intl.NumberFormat('id-ID').format(it.quantity * it.price) + '</div>' +
+                '</div>';
+        });
+        document.getElementById('hdItems').innerHTML = itemsHtml;
+        document.getElementById('hdCustomer').textContent = t.customer_name || '-';
+        document.getElementById('hdQty').textContent = totalQty + ' item';
+        document.getElementById('hdTotal').textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(t.total_price);
+
+        var ratingBox = document.getElementById('hdRatingBox');
+        if (t.rating) {
+            var stars = '';
+            for (var i = 1; i <= 5; i++) {
+                stars += (i <= t.rating ? '&#9733;' : '<span class="off">&#9733;</span>');
+            }
+            document.getElementById('hdStars').innerHTML = stars;
+            var commentEl = document.getElementById('hdComment');
+            if (t.comment) {
+                commentEl.textContent = '"' + t.comment + '"';
+                commentEl.style.display = 'block';
+            } else {
+                commentEl.style.display = 'none';
+            }
+            ratingBox.style.display = 'block';
+        } else {
+            ratingBox.style.display = 'none';
+        }
+
+        document.getElementById('historyDetailOverlay').classList.add('show');
+        document.getElementById('historyDetail').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    };
+
+    function closeHistoryDetail() {
+        document.getElementById('historyDetailOverlay').classList.remove('show');
+        document.getElementById('historyDetail').classList.remove('show');
+        document.body.style.overflow = '';
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -655,6 +721,12 @@
         document.getElementById('drawerCloseBtn').addEventListener('click', closeDrawer);
         document.getElementById('drawerClearBtn').addEventListener('click', clearCart);
         document.getElementById('drawerCheckoutBtn').addEventListener('click', function() { closeDrawer(); submitOrder(); });
+        document.getElementById('hdCloseBtn').addEventListener('click', closeHistoryDetail);
+        document.getElementById('hdCloseBtn2').addEventListener('click', closeHistoryDetail);
+        document.getElementById('historyDetailOverlay').addEventListener('click', closeHistoryDetail);
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeHistoryDetail();
+        });
         initFeedback();
     });
 })();
